@@ -9,6 +9,30 @@ Ext.define('Consulting.desktop.src.view.Onboarding.EmergencyContactDetails', {
     scrollable: true,
     bodyPadding: 20,
     width: '100%',
+  /*  viewModel:{
+        stores: {
+            personStore: {
+               type: 'store',
+                model: 'Consulting.desktop.src.view.Onboarding.PersonalInfoModel',
+                autoLoad: true,
+                proxy: {   
+                    type: 'ajax',
+                    url: 'http://localhost:8080/api/getLoggedInEmployeeIdentityDetails',
+                    reader: {
+                        type: 'json'
+                    }
+                },
+              
+            }
+        },
+        data: {
+            person: {} // Initialize with an empty object
+        }
+    
+    },
+    listeners: {
+        show: 'onAfterRender'
+    },*/
     buttons: {
        
     },

@@ -3,18 +3,38 @@ Ext.define('Consulting.desktop.src.view.Onboarding.OnboardingController', {
     alias: 'controller.Onboarding',
     init: function() {
         console.log('Controller loaded');
-       
-    },
-    onAfterRender: function () {
-        const viewModel = this.getViewModel();
-        const personStore = viewModel.getStore('personStore');
-        personStore.load({
-            callback: function (records) {
-                if (records.length > 0) {
-                    viewModel.set('person', records[0].getData());
-                }
+
+        this.control({
+            
+            'button[action=updatePdf]': {
+                
+                click: this.updatePdf
             }
         });
+    },
+    onAfterRender: function () {
+      //  debugger;
+        const viewModel = this.getViewModel();
+        const personStore = viewModel.getStore('personStore');
+        if (personStore) {
+            personStore.load({
+                callback: function(records) {
+                    if (records.length > 0) {
+                        viewModel.set('person', records[0].getData());
+                    }
+                }
+            });
+        } else {
+            console.error('Person store is not available.');
+        }
+           // Check if the current page is the last one
+           nextIndex= this.getView().getActiveItemIndex();
+           if (nextIndex ===4) { // Assuming the last page is the 4th page
+            debugger;
+            var combo = this.lookupReference('workAuthLookup');
+            var workauthname = this.getViewModel().get('person.workauthname');
+            this.onWorkAuthChangeBinding(workauthname); // Trigger the binding function
+        }
     },
     onSaveNext: function (sender, record) {
         Ext.Msg.confirm('Confirm', 'Are you sure?', 'onConfirm', this);
@@ -37,7 +57,13 @@ Ext.define('Consulting.desktop.src.view.Onboarding.OnboardingController', {
             identityNumberField.validate();
         }
     },
+    onWorkAuthChangeBinding: function(newValue) {
+        var combo = this.lookupReference('workAuthLookup'); // Get the combobox reference
+     
+      this.onWorkAuthChange(combo, newValue); // Trigger the change function
+    },
     onWorkAuthChange: function(combo, newValue) {
+   
         var refs = this.getReferences();
         refs.uscisNumberField.setHidden(true);
         refs.validFromField.setHidden(true);
@@ -46,10 +72,16 @@ Ext.define('Consulting.desktop.src.view.Onboarding.OnboardingController', {
         refs.i20Field.setHidden(true);
         refs.CPTdocField.setHidden(true);
         refs.jobDutiesField.setHidden(true);
-        refs.h1bdocField.setHidden(true);
-        refs.i94docField.setHidden(true);
-        refs.i9docField.setHidden(true);
-
+        refs.sevisid.setHidden(true);
+        refs.sevisschool.setHidden(true);
+        refs.DSO.setHidden(true);
+        refs.dateawarded.setHidden(true);    
+        refs.CIP.setHidden(true);
+        refs.EAD.setHidden(true);
+        refs.I983.setHidden(true);
+        refs.I9.setHidden(false);
+        refs.StudentRole.setHidden(true);
+        refs.Goals.setHidden(true);
         switch(newValue) {
             case 'h1b':
                 refs.jobDutiesField.setHidden(false);
@@ -63,8 +95,24 @@ Ext.define('Consulting.desktop.src.view.Onboarding.OnboardingController', {
                 refs.jobDutiesField.setHidden(false);
                 refs.i94docField.setHidden(false);
                 break;
+            case 'i983 Master':
+                refs.uscisNumberField.setHidden(false);
+                refs.validFromField.setHidden(false);
+                refs.validToField.setHidden(false);
+                refs.attachDocField.setHidden(false);
+                refs.sevisid.setHidden(false);
+                refs.sevisschool.setHidden(false);
+                refs.DSO.setHidden(false);
+                refs.dateawarded.setHidden(false);    
+                refs.CIP.setHidden(false);
+                refs.EAD.setHidden(false);
+                refs.I983.setHidden(false);
+                refs.StudentRole.setHidden(false);
+                refs.Goals.setHidden(false);
+                refs.jobDutiesField.setHidden(false);
+              
             default:
-                var showFields = ['opt', 'i983', 'h4ead', 'gc', 'gcead'].includes(newValue);
+                var showFields = ['opt','i983 Master', 'h4ead', 'gc', 'gcead'].includes(newValue);
                 refs.uscisNumberField.setHidden(!showFields);
                 refs.validFromField.setHidden(!showFields);
                 refs.validToField.setHidden(!showFields);
@@ -82,16 +130,21 @@ Ext.define('Consulting.desktop.src.view.Onboarding.OnboardingController', {
             if (activeItem.isValid()) {
                 this.getView().setActiveItemIndex(nextIndex);
                 me.getViewModel().set('isPrevDisabled', nextIndex === 0);
-                me.getViewModel().set('isNextDisabled', nextIndex === itemCount - 1);
+                me.getViewModel().set('isNextDisabled', nextIndex === itemCount - 2);
             } else {
                 Ext.Msg.alert('Validation', 'Please fill out required fields before proceeding.');
             }
+
         }
+
+     
     },
     showPrevious: function() {
         this.doCardNavigation(-1);
     },
     showNext: function() {
+   
+       
         this.doCardNavigation(1);
     },
     showReset: function() {
@@ -101,187 +154,86 @@ Ext.define('Consulting.desktop.src.view.Onboarding.OnboardingController', {
         var me = this;
         var formPanel = this.getView();
        var form = formPanel.getActiveItem();
-      
+      debugger;
+    
         if (!form) {
             console.error("No active form found");
             return;
         }
-debugger;
-        if (form.isValid()) {
-            if (formPanel.items.indexOf(form) === 0) {
-                form.submit({
-                    url: 'http://localhost:8080/api/saveLoggedInEmployee',
-                    method: 'POST',
-                    success: function (form, action) {
-                        me.showNext();
-                        Ext.Msg.alert('Success', 'Form submitted successfully!');
-                    },
-                    failure: function (form, action) {
-                        me.showNext();
-                        Ext.Msg.alert('Failed', 'Form submission failed. Please try again.');
-                    },
-                });
-            } else if (formPanel.items.indexOf(form) === 1) {
-                    form.submit({
-                        url: 'http://localhost:8080/api/saveLoggedInEmployeeIdentityInfo',
-                        method: 'POST',
-                        success: function (form, action) {
-                            me.showNext();
-                            Ext.Msg.alert('Success', 'Form submitted successfully!');
-                        },
-                        failure: function (form, action) {
-                            me.showNext();
-                            Ext.Msg.alert('Failed', 'Form submission failed. Please try again.');
-                        },
-                    });
-            } else if (formPanel.items.indexOf(form) === 3) {
-                form.submit({
-                        url: 'http://localhost:8080/api/saveLoggedInEmployeePassportInfo',
-                        method: 'POST',
-                        success: function (form, action) {
-                            me.showNext();
-                            Ext.Msg.alert('Success', 'Form submitted successfully!');
-                        },
-                        failure: function (form, action) {
-                            me.showNext();
-                            Ext.Msg.alert('Failed', 'Form submission failed. Please try again.');
-                        },
-                    });
-            } else if (formPanel.items.indexOf(form) === 4) {
-                form.submit({
-                        url: 'http://localhost:8080/api/saveLoggedInEmployeeWorkAuthInfo',
-                        method: 'POST',
-                        success: function (form, action) {
-                            me.showNext();
-                            Ext.Msg.alert('Success', 'Form submitted successfully!');
-                        },
-                        failure: function (form, action) {
-                            me.showNext();
-                            Ext.Msg.alert('Failed', 'Form submission failed. Please try again.');
-                        },
-                    });
-            } else {
-                Ext.Msg.alert('Error', 'Form submission failed. Please try again.');
-            }
-        } else {
-            Ext.Msg.alert('Invalid Data', 'Please correct the errors in the form before submitting.');
-        }
-    },
-  /*  onPersonStoreLoad   : function(panel, action) {
-        debugger;
-        var me = this;
-        this.getViewModel().getStore('personStore').load({
-            callback: function(records, operation, success) {
-                // do something after the load finishes
-                var form = me.getView();
-                form.loadRecord(records[0].data);  // Load first record into the form
-            }
-        });
-    },
-    loadData: function (panel, action) {
-        var activeItem = this.getView();
-        var form = activeItem.getActiveItem();
 
-        if (activeItem.items.indexOf(form) === 0) {
-            Ext.Ajax.request({
-                url: 'http://localhost:8080/api/getLoggedInEmployee',
-                method: 'GET',
-                withCredentials: true,
-                cors: true,
-                success: function (response) {
-                    var identityData = Ext.decode(response.responseText);
-                    if (identityData) {
-                        form.items.each(function(item) {
-                            if (identityData.hasOwnProperty(item.name)) {
-                                var value = identityData[item.name];
-                                if (item.xtype === 'datefield' && typeof value === 'string') {
-                                    debugger;
-                                   // var date = new Date(value);
-                                   var date = Ext.Date.parse(value, 'Y-m-d');
-                                    item.setValue(date);
-                                } else {
-                                    item.setValue(value);
-                                }
-                            }
-                        });
-                    }
-                },
-                failure: function () {
-                    Ext.Msg.alert('Error', 'Failed to load data');
+        if (form.isValid()) {
+            if (formPanel.items.indexOf(form) === 2) {
+                me.showNext();
+          
                 }
-            });
-        } else if (formPanel.items.indexOf(form) === 1) {
-            Ext.Ajax.request({
-                url: 'http://localhost:8080/api/getLoggedInEmployeeIdentityDetails',
-                method: 'GET',
-                withCredentials: true,
-                cors: true,
-                success: function (response) {
-                    var identityData = Ext.decode(response.responseText);
-                    if (identityData) {
-                        form.items.each(function(item) {
-                            if (identityData.hasOwnProperty(item.name)) {
-                                item.setValue(identityData[item.name]);
-                            }
-                        });
-                    }
-                },
-                failure: function () {
-                    Ext.Msg.alert('Error', 'Failed to load identity data');
-                }
-            });
-        } else if (formPanel.items.indexOf(form) === 3) {
-            Ext.Ajax.request({
-                url: 'http://localhost:8080/api/getLoggedInEmployeePassportDetails',
-                method: 'GET',
-                withCredentials: true,
-                cors: true,
-                success: function (response) {
-                    var identityData = Ext.decode(response.responseText);
-                    if (identityData) {
-                        form.items.each(function(item) {
-                            if (identityData.hasOwnProperty(item.name)) {
-                                item.setValue(identityData[item.name]);
-                            }
-                        });
-                    }
-                },
-                failure: function () {
-                    Ext.Msg.alert('Error', 'Failed to load identity data');
-                }
-            });
-        } else if (formPanel.items.indexOf(form) === 4) {
-            Ext.Ajax.request({
-                url: 'http://localhost:8080/api/getLoggedInEmployeeWorkAuthorizationDetails',
-                method: 'GET',
-                withCredentials: true,
-                cors: true,
-                success: function (response) {
-                    var identityData = Ext.decode(response.responseText);
-                    if (identityData) {
-                        form.items.each(function(item) {
-                            if (identityData.hasOwnProperty(item.name)) {
-                                item.setValue(identityData[item.name]);
-                            }
-                        });
-                    }
-                },
-                failure: function () {
-                    Ext.Msg.alert('Error', 'Failed to load identity data');
-                }
-            });
-        }
-    },
-    onSubmit: function () {
-        var formPanel = this.getView();
-        formPanel.submit({
-            url: 'http://localhost:8080/api/saveLoggedInEmployee',
-            success: function () {
-                Ext.Msg.alert('Success', 'Form submitted successfully!');
+            }},
+    updatePdf: function() {
+debugger;
+
+        Ext.Ajax.request({
+            url: 'http://localhost:8080/api/update-pdf',
+            method: 'POST',
+         
+            success: function(response) {
+                Ext.Msg.alert('Success', response.responseText);
             },
-            failure: function () {
-                Ext.Msg.alert('Error', 'Form submission failed.');
+            failure: function() {
+                Ext.Msg.alert('Failure', 'Failed to update PDF.');
             }
         });
-    }*/
+    },
+   
+    onPreviousButtonClick: function() {
+        var currentPanel = this.getView().getActiveItem();
+        var currentPanelId = currentPanel.getItemId();
+
+        switch (currentPanelId) {
+            case 'personalInfo':
+                this.fireEvent('personalInfoPrevious', currentPanel);
+                break;
+            case 'identityInfo':
+                this.fireEvent('identityInfoPrevious', currentPanel);
+                break;
+            case 'emergencyContactDetails':
+                this.fireEvent('emergencyContactPrevious', currentPanel);
+                break;
+            case 'passportDetails':
+                this.fireEvent('passportDetailsPrevious', currentPanel);
+                break;
+            case 'workAuthorization':
+                this.fireEvent('workAuthorizationPrevious', currentPanel);
+                break;
+            default:
+                console.error('Unknown panel:', currentPanelId);
+        }
+    },
+
+    onSaveNextButtonClick: function() {
+        var currentPanel = this.getView().getActiveItem();
+        var currentPanelId = currentPanel.getItemId();
+
+        // Fire an event specific to the current panel
+        switch (currentPanelId) {
+            case 'personalInfo':
+                this.fireEvent('personalInfoSaveNext', currentPanel);
+                break;
+            case 'identityInfo':
+                this.fireEvent('identityInfoSaveNext', currentPanel);
+                break;
+            case 'emergencyContactDetails':
+               // this.fireEvent('emergencyContactSaveNext', currentPanel);
+               this.showNext();
+                break;
+            case 'passportDetails':
+                this.fireEvent('passportDetailsSaveNext', currentPanel);
+                break;
+            case 'workAuthorization':
+                this.fireEvent('workAuthorizationSaveNext', currentPanel);
+                break;
+            default:
+                console.error('Unknown panel:', currentPanelId);
+        }
+    },
+
+ 
 });

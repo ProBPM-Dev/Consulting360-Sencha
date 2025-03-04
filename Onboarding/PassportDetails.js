@@ -2,13 +2,40 @@ Ext.define('Consulting.desktop.src.view.Onboarding.PassportDetails', {
     extend: 'Ext.form.Panel',
     alias: 'widget.passportDetails',
     requires: [
-        'Consulting.desktop.src.view.Onboarding.OnboardingController'
+        'Consulting.desktop.src.controller.PassportController'
     ],
     layout: 'vbox',
-    controller: 'Onboarding',
+    controller: 'passport',
     scrollable: true,
     bodyPadding: 20,
     width: '100%',
+    viewModel:{
+   
+        stores: {
+            personStore: {
+                
+                type: 'store',
+                model: 'Consulting.desktop.src.view.Onboarding.PersonalInfoModel',
+                autoLoad: true,
+                proxy: {   
+                    type: 'ajax',
+                    url: 'http://localhost:8080/api/getLoggedInEmployeePassportDetails',
+                    reader: {
+                        type: 'json'
+                    }
+                },
+              
+            }
+        },
+        data: {
+            person: {} // Initialize with an empty object
+        }
+    
+    },
+    listeners: {
+        show: 'onAfterRender'
+       
+    },
     buttons: {
        
     },
@@ -17,9 +44,7 @@ Ext.define('Consulting.desktop.src.view.Onboarding.PassportDetails', {
         labelWidth: 150,
         margin: '0 0 15 0'
     },
-    listeners: {
-        show: 'loadData' 
-          },
+ 
     items: [
         {
             xtype: 'fieldset',
@@ -37,6 +62,7 @@ Ext.define('Consulting.desktop.src.view.Onboarding.PassportDetails', {
                     name: 'passportnumber',
                     allowBlank: false,
                     blankText: 'passport number is required',
+                    bind: '{person.passPortNumber}',
                 },
                 {
                     xtype: 'datefield',
@@ -45,7 +71,8 @@ Ext.define('Consulting.desktop.src.view.Onboarding.PassportDetails', {
                     format: 'm/d/Y',
                     labelAlign: 'placeholder',
                     allowBlank: false,
-                    blankText: 'Please enter a valid Passport Expiry Date'
+                    blankText: 'Please enter a valid Passport Expiry Date',
+                    bind: '{person.expiryDate}',
                 },
                 {
                     xtype: 'textfield',
@@ -53,7 +80,8 @@ Ext.define('Consulting.desktop.src.view.Onboarding.PassportDetails', {
                     name: 'addressLine1',
                     labelAlign: 'placeholder',
                     allowBlank: false,
-                    blankText: 'Please enter a valid Address'
+                    blankText: 'Please enter a valid Address',
+                    bind: '{person.addressLine1}',
                 },
                 {
                     xtype: 'textfield',
@@ -65,28 +93,32 @@ Ext.define('Consulting.desktop.src.view.Onboarding.PassportDetails', {
                     label: 'City',
                     name: 'city',
                     allowBlank: false,
-                    blankText: 'Please enter a valid City'
+                    blankText: 'Please enter a valid City',
+                    bind: '{person.city}',
                 },
                 {
                     xtype: 'textfield',
                     label: 'State',
                     name: 'state',
                     allowBlank: false,
-                    blankText: 'Please enter a valid State'
+                    blankText: 'Please enter a valid State',
+                    bind: '{person.state}',
                 },
                 {
                     xtype: 'textfield',
                     label: 'Country',
                     name: 'passPortIssuedCountry',
                     allowBlank: false,
-                    blankText: 'Please enter a valid Country'
+                    blankText: 'Please enter a valid Country',
+                    bind: '{person.passPortIssuedCountry}',
                 },
                 {
                     xtype: 'textfield',
                     label: 'Pincode',
                     name: 'zip',
                     allowBlank: false,
-                    blankText: 'Please enter a valid Pincode'
+                    blankText: 'Please enter a valid Pincode',
+                    bind: '{person.zipCode}',
                 },
                 {
                     xtype: 'filefield',

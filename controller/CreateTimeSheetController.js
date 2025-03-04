@@ -12,12 +12,18 @@ Ext.define('Consulting.desktop.src.controller.CreateTimeSheetController', {
         }
     },
 
-    editTimeSheet:function(record){
+    editTimeSheet:function(record,po){
+        debugger;
+ 
+
         console.log(record);
         var vm = this.getViewModel();
-        vm.set('panelTitle',vm.get("poName") + ' Edit TimeSheet');
+        vm.set("po",po);
+        vm.set('panelTitle','Edit TimeSheet for '+ po.name);
+        vm.set("recordId",record.data.id);
         this.processResponse(record.data);
         var panel = vm.getView();
+      
         if (panel) {
             if (panel.collapsed) {
                 panel.expand();
@@ -25,18 +31,18 @@ Ext.define('Consulting.desktop.src.controller.CreateTimeSheetController', {
         }
     },
     onBeforeExpand:function(panel){
-        debugger;
         console.log(this.getViewModel().get("openPanel"));
         return this.getViewModel().get("openPanel");
 
     },
     isHoliday: function(day) {
-        debugger;
-       
         var holidayData = Ext.decode(localStorage.getItem('staticData')) || [];
     
         var formattedDate = Ext.Date.format(day, 'Y-m-d');
-    
+        var dayOfWeek = Ext.Date.format(day, 'N');
+        if(dayOfWeek == 6 || dayOfWeek == 7){
+            return 'weekend';
+        }
         var holiday = holidayData.find(function(record) {
             var holidayDate = new Date(record.holiday); // Parse ISO date string
             var holidayFormattedDate = Ext.Date.format(holidayDate, 'Y-m-d');
@@ -47,8 +53,29 @@ Ext.define('Consulting.desktop.src.controller.CreateTimeSheetController', {
         }
         return '';
     },
-       processResponse:function(newTimesheet){
+    processDay  :   function(newTimesheet,sd){
         var vm = this.getViewModel();
+        for(var i=1;i<8;i++){
+            var x = "day"+i;
+            var holidayName = this.isHoliday(sd);
+            vm.set(x,newTimesheet[x]);
+            if(holidayName == "weekend"){
+                vm.set(x+"Label",Ext.Date.format(sd,"m-d-Y \\[l\\]" ));
+                vm.set(x+"Required",false);
+            }else if(holidayName != ""){
+                vm.set(x+"Label",Ext.Date.format(sd,"m-d-Y \\[l\\]" ) + holidayName);
+                vm.set(x+"Required",false);
+            }else{
+                vm.set(x+"Label",Ext.Date.format(sd,"m-d-Y \\[l\\]" ));
+                vm.set(x+"Required",true);
+            }
+            sd.setDate(sd.getDate()+ 1) ;
+        }
+    },
+    processResponse:function(newTimesheet){
+        var vm = this.getViewModel();
+               // Get the panel reference
+   
         var sd = new Date(newTimesheet.startDate);
         var ed = new Date(newTimesheet.endDate);
         vm.set("openPanel",true);
@@ -56,143 +83,66 @@ Ext.define('Consulting.desktop.src.controller.CreateTimeSheetController', {
         
         vm.set("weekStartDate",Ext.Date.format(sd,'m-d-Y'));
         vm.set("weekEndDate",Ext.Date.format(ed,'m-d-Y'));
-        var holidayName = this.isHoliday(sd);
-        vm.set("day1",newTimesheet.day1);
-        vm.set("day1Label",Ext.Date.format(sd,"m-d-Y \\[l\\]" ) + holidayName);
-        vm.set("isHoliday1", !!holidayName);
+        this.processDay(newTimesheet,sd);
+    },
 
-        sd.setDate(sd.getDate()+ 1) ;
-        holidayName = this.isHoliday(sd);
-        vm.set("day2",newTimesheet.day2);
-        vm.set("day2Label",Ext.Date.format(sd,"m-d-Y \\[l\\]" ) + holidayName);
-        vm.set("isHoliday2", !!holidayName);
-        console.log('isHoliday2:', vm.get('isHoliday2')); 
-        
-        sd.setDate(sd.getDate()+ 1) ;
-        vm.set("day3",newTimesheet.day3);
-        vm.set("day3Label",Ext.Date.format(sd,"m-d-Y \\[l\\]" ));
-        
-        sd.setDate(sd.getDate()+ 1) ;
-        vm.set("day4",newTimesheet.day4);
-        vm.set("day4Label",Ext.Date.format(sd,"m-d-Y \\[l\\]" ));
-        
-        sd.setDate(sd.getDate()+ 1) ;
-        vm.set("day5",newTimesheet.day5);
-        vm.set("day5Label",Ext.Date.format(sd,"m-d-Y \\[l\\]" ));
-        
-        sd.setDate(sd.getDate()+ 1) ;
-        vm.set("day6",newTimesheet.day6);
-        vm.set("day6Label",Ext.Date.format(sd,"m-d-Y \\[l\\]" ));
-        
-        sd.setDate(sd.getDate()+ 1) ;
-        vm.set("day7",newTimesheet.day7);
-        vm.set("day7Label",Ext.Date.format(sd,"m-d-Y \\[l\\]" ));
-       },
-
-       CreateTimeSheet: function(poName) {
+    CreateTimeSheet: function(po) {
         var me= this;
            console.log("Event fired");
-           this.getViewModel().set("poName", poName);
+           this.getViewModel().set("po", po);
            Ext.Ajax.request({
-            url: 'http://localhost:8080/api/createTimeSheetforLoggedInEmployee/' + encodeURIComponent(poName),
-            method: 'POST',
+            url: 'http://localhost:8080/api/createTimeSheetforLoggedInEmployee/' + po.id,
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
             },
             success: function (response) {
-                debugger;
                 var responseData = Ext.decode(response.responseText);
-
-                if (!responseData || !responseData.employeeTimeLineItems || responseData.employeeTimeLineItems.length === 0) {
+                if (!responseData) {
                     Ext.Msg.alert('Error', 'Failed to create timesheet.');
                     return;
                 }
-
                 // Fetch the newly created timesheet details
                 var vm = me.getViewModel();
-                vm.set('panelTitle',vm.get("poName") + ' Create New TimeSheet');
-                var newTimesheet = responseData.employeeTimeLineItems[0];
-                me.processResponse(newTimesheet);
+                me.fireEvent("eventRefreshTimeSheetGrid");
+                vm.set('panelTitle','Timesheet for ' + vm.get("po.name"));
+                vm.set("recordId",responseData.id);
+                me.processResponse(responseData);
                 var panel = me.getView();
                 if (panel) {
                     if (panel.collapsed) {
                         panel.expand();
                     }
-                    Ext.Msg.alert('Success', 'Timesheet created and loaded.');
                 }
             }, // Bind the context to the controller
             failure: function (response) {
                 Ext.Msg.alert('Error', 'Failed to create timesheet.');
             }
         });
-       },
+    },
 
     onSubmitButtonClick: function (button) {
-        debugger;
-        //var me = this;
-   
-      //var form=this;
-           var form = this.getView(); 
-        let fieldset = form.lookupReference('fieldset1');
-
-        if (!fieldset) {
-            console.error("No fieldset found");
-            return;
-        }
-
-        var clientComboBox = Ext.ComponentQuery.query('combobox[label="Choose Client"]')[0];
-        var clientTitle = clientComboBox ? clientComboBox.getValue() : null;
-
-        if (!clientTitle) {
-            Ext.Msg.alert('Error', 'Please select a client.');
-            return;
-        }
-
-        var isValid = true;
-        var values = {
-            title: clientTitle // Include the client title
-        };
-
-        fieldset.items.each(function (item) {
-            if (item.isFormField) { // Ensures only form fields are processed
-                if (item.allowBlank === false && !item.getValue()) {
-                    isValid = false;
-                    item.markInvalid('This field is required');
-                } else {
-                    values[item.name] = item.getValue();
-                }
-            }
-        });
-
-        if (isValid) {
-            debugger;
-         /*   form.submit({
-                url: 'http://localhost:8080/api/saveTimeSheetforLoggedInEmployee/' + encodeURIComponent(clientTitle),
+        var form = this.getView();
+        if (form.isValid()) {
+            var vm = this.getViewModel();
+            var po= vm.get("po");
+            var sd = new Date(vm.get("weekStartDate"));
+            var ed = new Date(vm.get("weekEndDate"));
+            form.submit({
+                url: 'http://localhost:8080/api/saveTimeSheetforLoggedInEmployee/' + po.id,
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
+                params:{
+                    id:vm.get("recordId"),
+                    startDate: Ext.Date.format(sd,'U'),
+                    endDate: Ext.Date.format(ed,'U')
                 },
-                success: function (form, action) {
+                success: function(form, action) {
                     Ext.Msg.alert('Success', 'Form submitted successfully!');
                 },
-                failure: function (form, action) {
-                    console.log('Failure:', action);
+                failure: function(form, action) {
                     Ext.Msg.alert('Failed', 'Form submission failed. Please try again.');
-                }
-            });*/
-            Ext.Ajax.request({
-                url: 'http://localhost:8080/api/saveTimeSheetforLoggedInEmployee/' + encodeURIComponent(clientTitle),
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
                 },
-                jsonData: values, // Send the form data as JSON
-                success: function (response) {
-                    Ext.Msg.alert('Success', 'Form submitted successfully!');
-                },
-                failure: function (response) {
-                    Ext.Msg.alert('Failed', 'Form submission failed. Please try again.');
-                }
+      
             });
         }
     }

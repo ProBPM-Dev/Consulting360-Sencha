@@ -16,7 +16,21 @@ Ext.define('Consulting.desktop.src.view.Onboarding.PersonalInfoModel', {
         {name:'City', type:'string'},
         {name:'state', type:'string'},
         {name:'zipCode', type:'string'},
-        {name:'expiryDate', type:'date'}
+        {name:'expiryDate', type:'date'},
+        {name:'issueDate', type:'date'},
+        {name:'passPortNumber', type:'string'},
+        {name:'passPortIssuedCountry', type:'string'},
+        {name:'emfullname', type:'string'},
+        { name: 'validFrom', type: 'date' },
+        { name: 'validto', type: 'date' },
+        {name:'documentNumber', type:'string'},
+        {name:'uscisNumber', type:'string'},
+        { 
+            name: 'workauthname', 
+            type: 'string',
+            mapping: 'workAuthLookup.name' // Map workAuthLookup.name to workauthname
+        }
+
     ],
     
 })

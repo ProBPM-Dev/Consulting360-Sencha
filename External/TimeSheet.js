@@ -1,194 +1,141 @@
 
 Ext.define('Consulting.desktop.src.view.External.TimeSheet', {
-    extend: 'Ext.container.Container',
-    xtype: 'panel-complex-collapsible',
+    extend: 'Ext.grid.Grid',
     alias: 'widget.timesheet',
-
     requires: [
-        'Ext.panel.Collapser',
         'Ext.grid.Grid',
-         'Consulting.desktop.src.controller.Timesheet',
+        'Consulting.desktop.src.controller.Timesheet',
         'Consulting.desktop.src.model.External.TimeSheet',
-        'Consulting.desktop.src.view.External.CreateTimeSheetPanel' 
+        'Ext.grid.filters.*'
     ],
-
     controller: 'Timesheet', 
-
-    viewModel: {
-        data: {
-            collapsible: true,
-           
-        },
-        formulas: {
-            eastCollapseConfig: function (get) {
-                return get('collapsible') ? { direction: 'right' } : false;
-            }
-        }
+    listeners: {
+        childtap: 'onCellTap'
     },
-
-    layout: 'vbox',
-
-    items: [
-        {
-            xtype: 'toolbar',
-            docked: 'top',
-            margin: '0 0 10 0',
-            items: [
-                {
-                    xtype: 'combobox',
-                    label: 'Choose Client',
-                    queryMode: 'remote',
-                    displayField: 'title',
-                    valueField: 'title',
-                    align: "right",
-                    store: {
-                        autoLoad: true,
-                        proxy: {
-                            type: 'rest',
-                            url: 'http://localhost:8080/api/getEmployeePOTitle',
-                            reader: {
-                                type: 'json'
-                            }
-                        }
+    viewModel:{
+        data:{
+            url :'http://localhost:8080/api/getTimeSheets/'
+        },
+        stores: {
+            timesheet: {
+                model: 'Consulting.desktop.src.model.External.TimeSheet',
+                autoLoad: false,
+                pageSize: 10,
+                remoteSort: true,
+                remoteFilter: true,
+                proxy: {
+                    type: 'rest',
+                    url : 'http://localhost:8080/api/getTimeSheets/',
+                    reader: {
+                        type: 'json',
+                        rootProperty: 'content'
                     }
                 },
-                {
-                    xtype: 'button',
-                    text: 'Create Timesheet',
-                    align: 'right',
-                    margin: '0 0 0 10',
-                 handler: 'onCreateTimesheetButtonClick'
-             
+                listeners:{
+                    beforeload:'onStoreBeforeLoad'
                 }
-            ]
+            }
+        }
+
+    },
+    bind:{
+        title:'{selectedPO.name}',
+        store:'{timesheet}'
+    },
+    plugins: {
+        gridfilters: true,
+        pagingtoolbar: true
+    },
+    rowNumbers: true,
+
+    columns: [
+        {
+            text: 'Week Start Date',
+            dataIndex: 'startDate',
+            format: 'm-d-Y',
+            xtype: 'datecolumn'
         },
         {
-            xtype: 'container',
-            layout: 'hbox',
-            flex: 2,
-            defaults: {
-                xtype: 'panel',
-                border: true
-            },
-            items: [
-                {
-                    flex: 2,
-                    layout: 'fit',
-                    items: [
-                        {
-                            xtype: 'grid',
-                            title: 'TimeSheets',
-                            reference: 'timesheetGrid',
-                            plugins: {
-                                gridfilters: true,
-                                pagingtoolbar: true
-                            },
-                            store: {
-                                model: 'Consulting.desktop.src.model.External.TimeSheet',
-                                autoLoad: true,
-                                pageSize: 10,
-                                remoteSort: true,
-                                remoteFilter: true
-                            },
-                            rowNumbers: true,
-                            columns: [
-                                {
-                                    text: 'Week Start Date',
-                                    dataIndex: 'startDate',
-                                    width: 115,
-                                    format: 'm-d-Y',
-                                    xtype: 'datecolumn'
-                                },
-                                {
-                                    text: 'Week End Date',
-                                    dataIndex: 'endDate',
-                                    width: 115,
-                                    format: 'm-d-Y',
-                                    xtype: 'datecolumn'
-                                },
-                                {
-                                    text: 'Day1',
-                                    dataIndex: 'day1',
-                                    minWidth: 150
-                                },
-                                {
-                                    text: 'Day2',
-                                    dataIndex: 'day2',
-                                    minWidth: 150
-                                },
-                                {
-                                    text: 'Day3',
-                                    dataIndex: 'day3',
-                                    minWidth: 150
-                                },
-                                {
-                                    text: 'Day4',
-                                    dataIndex: 'day4',
-                                    minWidth: 150
-                                },
-                                {
-                                    text: 'Day5',
-                                    dataIndex: 'day5',
-                                    minWidth: 150
-                                },
-                                {
-                                    text: 'Day6',
-                                    dataIndex: 'day6',
-                                    minWidth: 150
-                                },
-                                {
-                                    text: 'Day7',
-                                    dataIndex: 'day7',
-                                    minWidth: 150
-                                }, {
-                                    width: 70,
-                                    hideable: false,
-                                    cell: {
-                                        tools: {
-                                            approve: {
-                                                iconCls: 'x-fa fa-check green',
-                                                handler: 'onEdit'
-                                            }
-                                        }
-                                    }
-                                }    
-                            ],
-                            dockedItems: [
-                                {
-                                    xtype: 'toolbar',
-                                    docked: 'top',
-                                    items: [
-                                        {
-                                            text: 'Filter',
-                                            iconCls: 'x-fa fa-filter',
-                                            xtype: 'button',
-                                            reference: 'ShowFilters',
-                                            menu: {
-                                                listeners: {
-                                                    beforeShow: 'onShowFilters',
-                                                    beforeHide: 'onHideFilters'
-                                                },
-                                                items: [
-                                                    {
-                                                        text: 'All Filter',
-                                                        reference: 'allFilter',
-                                                        checked: true,
-                                                        checkHandler: 'handleAllFilters'
-                                                    },
-                                                    '-'
-                                                ]
-                                            }
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    xtype: 'CreateTimeSheetPanel'
+            text: 'Week End Date',
+            dataIndex: 'endDate',
+            format: 'm-d-Y',
+            xtype: 'datecolumn'
+        },
+        {
+            text: 'Day1',
+            dataIndex: 'day1'
+        },
+        {
+            text: 'Day2',
+            dataIndex: 'day2'
+        },
+        {
+            text: 'Day3',
+            dataIndex: 'day3'
+        },
+        {
+            text: 'Day4',
+            dataIndex: 'day4'
+        },
+        {
+            text: 'Day5',
+            dataIndex: 'day5'
+        },
+        {
+            text: 'Day6',
+            dataIndex: 'day6'
+        },
+        {
+            text: 'Day7',
+            dataIndex: 'day7'
+        }, 
+        {
+            text: 'Approval',
+            dataIndex: 'approvedOn', // Date field
+            flex: 1,
+            renderer: function(value) {
+                if (value) {
+                    return '<span class="x-fa fa-lock approved-icon" style="color: green;"></span>';
+                } else {
+                    return '<span class="x-fa fa-edit edit-icon" style="color: blue; cursor: pointer;"></span>';
                 }
-            ]
+            },
+            cell: {
+                encodeHtml: false, // Ensures the HTML renders correctly
+            }
         }
-    ]
+    
+    ],
+    items: [{
+        xtype: 'toolbar',
+        docked: 'top',
+        layout: {
+            type: 'hbox',
+            align: 'left'
+        },
+        items: [{
+            text: 'Filter',
+            iconCls: 'x-fa fa-filter',
+            xtype: 'button',
+            reference: 'ShowFilters',
+            menu: {
+                listeners: {
+                    beforeShow: 'onShowFilters',
+                    beforeHide: 'onHideFilters'
+                },
+                items: [{
+                    text: 'All Filter',
+                    reference: 'allFilter',
+                    checked: true,
+                    checkHandler: 'handleAllFilters'
+                }]
+            }
+        },{
+            xtype: 'button',
+            align: 'right',
+            text: 'Create Timesheet',
+            ui: 'action',
+            handler: 'onCreateTimesheetButtonClick'
+        }]
+    }]
 });

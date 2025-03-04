@@ -3,10 +3,10 @@ Ext.define('Consulting.desktop.src.view.Onboarding.PersonalInfo', {
     extend: 'Ext.form.Panel',
     alias: 'widget.personalInfo',
     requires: [
-        'Consulting.desktop.src.view.Onboarding.OnboardingController'
+        'Consulting.desktop.src.controller.PersonalInfoController'
     ],
     layout: 'vbox', 
-    controller: 'Onboarding',
+    controller: 'personalInfo',
     scrollable: true,
     bodyPadding: 20,
     width: '100%',

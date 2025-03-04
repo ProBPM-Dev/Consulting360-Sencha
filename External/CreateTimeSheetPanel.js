@@ -6,22 +6,22 @@ Ext.define('Consulting.desktop.src.view.External.CreateTimeSheetPanel', {
     width: 300,
     collapsed: true,
     collapseDirection: 'right',
+    border: true,
     bind: {
         collapsible: '{eastCollapseConfig}',
         title:'{panelTitle}'
     },
+    
     listeners:{
         beforeexpand:'onBeforeExpand'
     },
     layout: 'vbox',
     viewModel:{
         data:{
-            poName:"",
-            submitBtnDisabled:true,
+            po:"",
             panelTitle:'',
             openPanel:false,
-            isHoliday1: false, // Flag for Day 1
-            isHoliday2: false,
+            recordId:""
         }
     },
     items: [
@@ -32,7 +32,8 @@ Ext.define('Consulting.desktop.src.view.External.CreateTimeSheetPanel', {
             bind:{title:'Week {weekStartDate} to {weekEndDate}'},
             instructions: 'Enter hours for each day.',
             defaults: {
-                labelWidth: '35%'
+                labelWidth: '35%',
+                labelCls:'holiday-label'
             },
             store: {
                 fields: ['id', 'year', 'holidayName', 'holiday', 'active'],
@@ -42,12 +43,11 @@ Ext.define('Consulting.desktop.src.view.External.CreateTimeSheetPanel', {
                 {
                     xtype: 'textfield',
                     name: 'day1',
-                    bind:{label:'{day1Label}', value:'{day1}',
-                        cls: '{isHoliday1 ? "holiday-field" : ""}', 
-                        readOnly: '{isHoliday1}', 
-                        editable: '{!isHoliday1}'},
-                    allowBlank: false,
-                    required: true,
+                    bind:{
+                        label:'{day1Label}', value:'{day1}',
+                        labelCls: '{day1Required ? "holiday-label" : ""}', 
+                        required: '{day1Required}'
+                    },
                     validators: {
                         type: 'format',
                         matcher: /^\d+(\.\d{1,2})?$/
@@ -56,13 +56,10 @@ Ext.define('Consulting.desktop.src.view.External.CreateTimeSheetPanel', {
                 {
                     xtype: 'numberfield',
                     bind:{label:'{day2Label}', value:'{day2}',
-            cls: '{isHoliday2 ? "holiday-field" : ""}', 
-            readOnly: '{isHoliday2}', 
-            editable: '{!isHoliday2}'},
+                    labelCls: '{day2Required ? "holiday-label" : ""}', 
+                    required: '{day2Required}'},
                     name: 'day2',
-                    allowBlank: false,
                     minValue: 0,
-                    required: true,
                     validators: {
                         type: 'format',
                         matcher: /^\d+(\.\d{1,2})?$/
@@ -75,11 +72,9 @@ Ext.define('Consulting.desktop.src.view.External.CreateTimeSheetPanel', {
                 },
                 {
                     xtype: 'numberfield',
-                    bind:{label:'{day3Label}', value:'{day3}'},
+                    bind:{label:'{day3Label}', value:'{day3}',required: '{day3Required}',labelCls: '{day3Required ? "holiday-label" : ""}'},
                     name: 'day3',
-                    allowBlank: false,
                     minValue: 0,
-                    required: true,
                     validators: {
                         type: 'format',
                         matcher: /^\d+(\.\d{1,2})?$/
@@ -87,11 +82,9 @@ Ext.define('Consulting.desktop.src.view.External.CreateTimeSheetPanel', {
                 },
                 {
                     xtype: 'numberfield',
-                    bind:{label:'{day4Label}', value:'{day4}'},
+                    bind:{label:'{day4Label}', value:'{day4}',required: '{day4Required}',labelCls: '{day4Required ? "holiday-label" : ""}'},
                     name: 'day4',
-                    allowBlank: false,
                     minValue: 0,
-                    required: true,
                     validators: {
                         type: 'format',
                         matcher: /^\d+(\.\d{1,2})?$/
@@ -99,11 +92,9 @@ Ext.define('Consulting.desktop.src.view.External.CreateTimeSheetPanel', {
                 },
                 {
                     xtype: 'numberfield',
-                    bind:{label:'{day5Label}', value:'{day5}'},
+                    bind:{label:'{day5Label}', value:'{day5}',required: '{day5Required}',labelCls: '{day5Required ? "holiday-label" : ""}'},
                     name: 'day5',
-                    allowBlank: false,
                     minValue: 0,
-                    required: true,
                     validators: {
                         type: 'format',
                         matcher: /^\d+(\.\d{1,2})?$/
@@ -111,11 +102,9 @@ Ext.define('Consulting.desktop.src.view.External.CreateTimeSheetPanel', {
                 },
                 {
                     xtype: 'numberfield',
-                    bind:{label:'{day6Label}', value:'{day6}'},
+                    bind:{label:'{day6Label}', value:'{day6}',required: '{day6Required}',labelCls: '{day6Required ? "holiday-label" : ""}'},
                     name: 'day6',
-                    allowBlank: false,
                     minValue: 0,
-                    required: true,
                     validators: {
                         type: 'format',
                         matcher: /^\d+(\.\d{1,2})?$/
@@ -123,11 +112,9 @@ Ext.define('Consulting.desktop.src.view.External.CreateTimeSheetPanel', {
                 },
                 {
                     xtype: 'numberfield',
-                    bind:{label:'{day7Label}', value:'{day7}'},
+                    bind:{label:'{day7Label}', value:'{day7}',required: '{day7Required}',labelCls: '{day7Required ? "holiday-label" : ""}'},
                     name: 'day7',
-                    allowBlank: false,
                     minValue: 0,
-                    required: true,
                     validators: {
                         type: 'format',
                         matcher: /^\d+(\.\d{1,2})?$/
@@ -138,7 +125,7 @@ Ext.define('Consulting.desktop.src.view.External.CreateTimeSheetPanel', {
         {
             xtype: 'button',
             text: 'Submit',
-            bind:{disabled:'{submitBtnDisabled}'},
+            formBind: true,
             margin: '10 0 0 0',
             handler: 'onSubmitButtonClick'
         }

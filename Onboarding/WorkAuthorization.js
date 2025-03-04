@@ -2,19 +2,43 @@ Ext.define('Consulting.desktop.src.view.Onboarding.WorkAuthorization', {
     extend: 'Ext.form.Panel',
     alias: 'widget.workAuthorization',
     requires: [
-        'Consulting.desktop.src.view.Onboarding.OnboardingController'
+        'Consulting.desktop.src.controller.WorkAuthorizationController'
     ],
     layout: 'vbox',
-    controller: 'Onboarding',
+    controller: 'workAuthorization',
     scrollable: true,
     bodyPadding: 20,
     width: '100%',
     buttons: {
-        submit: 'onSubmit'
+        //submit: 'onSubmit'
+    },
+    viewModel:{
+   
+        stores: {
+            personStore: {
+                
+                type: 'store',
+                model: 'Consulting.desktop.src.view.Onboarding.PersonalInfoModel',
+                autoLoad: true,
+                proxy: {   
+                    type: 'ajax',
+                    url: 'http://localhost:8080/api/getLoggedInEmployeeWorkAuthorizationDetails',
+                    reader: {
+                        type: 'json'
+                    }
+                },
+              
+            }
+        },
+        data: {
+            person: {} // Initialize with an empty object
+        }
+    
     },
     listeners: {
-        show: 'loadData' 
-          },
+        show: 'onAfterRender'
+       
+    },
     defaults: {
         anchor: '100%',
         labelWidth: 150,
@@ -38,7 +62,7 @@ Ext.define('Consulting.desktop.src.view.Onboarding.WorkAuthorization', {
                         fields: ['label', 'value'],
                         data: [
                             { label: "OPT Master's", value: 'opt' },
-                            { label: "i983 Master's", value: 'i983' },
+                            { label: "i983 Master", value: 'i983 Master' },
                             { label: "CPT Master's", value: 'cpt' },
                             { label: "CAP H1B first time from India", value: 'cap' },
                             { label: "H1B", value: 'h1b' },
@@ -53,6 +77,7 @@ Ext.define('Consulting.desktop.src.view.Onboarding.WorkAuthorization', {
                     valueField: 'value',
                     allowBlank: false,
                     blankText: 'Work Authorization is required',
+                    bind: '{person.workauthname}',
                     listeners: {
                         change: 'onWorkAuthChange'
                     }
@@ -66,7 +91,8 @@ Ext.define('Consulting.desktop.src.view.Onboarding.WorkAuthorization', {
                             label: 'USCIS Number',
                             name: 'uscisNumber',
                             hidden: true, // Default hidden
-                            reference: 'uscisNumberField'
+                            reference: 'uscisNumberField',
+                            bind: '{person.uscisNumber}',
                         },
                         {
                             xtype: 'datefield',
@@ -83,6 +109,49 @@ Ext.define('Consulting.desktop.src.view.Onboarding.WorkAuthorization', {
                             format: 'm/d/Y',
                             hidden: true, // Default hidden
                             reference: 'validToField'
+                        },
+                        {
+                            xtype: 'textfield',
+                            label: 'SEVIS ID No',
+                            name: 'sevisid',
+                            hidden: true, // Default hidden
+                            reference: 'sevisid'
+                        },
+                        {
+                            xtype: 'textfield',
+                            label: 'SEVIS School Code',
+                            name: 'Sevisschool',
+                            hidden: true, // Default hidden
+                            reference: 'sevisschool'
+                        },
+                        {
+                            xtype: 'textfield',
+                            label: 'Designated School Official (DSO) Name and Contact Information',
+                            name: 'DSO',
+                            hidden: true, // Default hidden
+                            reference: 'DSO'
+                        },
+                        {
+                            xtype: 'datefield',
+                            label: 'Date Awarded',
+                            name: 'dateawarded',
+                            format: 'm/d/Y',
+                            hidden: true, // Default hidden
+                            reference: 'dateawarded'
+                        },
+                        {
+                            xtype: 'textfield',
+                            label: 'Qualifying Major and Classification of Instructional Programs (CIP) Code:',
+                            name: 'CIP',
+                            hidden: true, // Default hidden
+                            reference: 'CIP'
+                        },
+                        {
+                            xtype: 'textfield',
+                            label: 'Employment Authorization Number',
+                            name: 'EAD',
+                            hidden: true, // Default hidden
+                            reference: 'EAD'
                         },
                         {
                             xtype: 'filefield',
@@ -109,36 +178,76 @@ Ext.define('Consulting.desktop.src.view.Onboarding.WorkAuthorization', {
                             reference: 'CPTdocField'
                         },
                         {
-                            xtype: 'textfield',
+                            xtype: 'textareafield',
                             label: 'Job Duties',
                             name: 'jobDuties',
                             hidden: true, // Default hidden
                             reference: 'jobDutiesField'
                         },
                         {
-                            xtype: 'filefield',
-                            label: 'Attach 797A Document',
-                            name: 'h1bdoc',
-                            buttonText: 'Select File...',
+                            xtype: 'textareafield',
+                            label: 'Student Role: Describe the student\'s role with the employer and how that role is directly related to enhancing the student\'s knowledge obtained through his or her qualifying STEM degree',
+                            name: 'StudentRole',
                             hidden: true, // Default hidden
-                            reference: 'h1bdocField'
+                            reference: 'StudentRole',
+                            height: 100, // Set a fixed height for the textarea
+                            maxLength: 500, // Optional: Limit the number of characters
+                            allowBlank: false, // Optional: Field is required
                         },
                         {
-                            xtype: 'filefield',
-                            label: 'Attach i94 Document',
-                            name: 'i94doc',
-                            buttonText: 'Select File...',
+                            xtype: 'textareafield',
+                            label: 'Goals and Objectives: Describe how the assignment(s) with the employer will help the student achieve his or her specific objectives for work-based learning related to his or her STEM degree. The description must both specify the student\'s goals regarding specific knowledge, skills, or techniques as well as the means by which they will be achieved',
+                          name: 'Goals',
                             hidden: true, // Default hidden
-                            reference: 'i94docField'
+                            reference: 'Goals'
                         },
                         {
-                            xtype: 'filefield',
-                            label: 'Attach i9 Document',
-                            name: 'i9doc',
-                            buttonText: 'Select File...',
-                            hidden: true, // Default hidden
-                            reference: 'i9docField'
+                            xtype: 'button',
+                            text: 'Generate I9',
+                            reference: 'I9',
+                            hidden: true,
+                            handler: function() {
+                                var email = 'mellamarthy1@gmail.com';
+                                Ext.Ajax.request({
+                    url: 'http://localhost:8080/api/updateI9-pdf',
+                    method: 'POST',
+                    params: {
+                        email: email
+                    },
+                    success: function(response) {
+                        Ext.Msg.alert('Success', response.responseText);
+                    },
+                    failure: function() {
+                        Ext.Msg.alert('Failure', 'Failed to update PDF.');
+                    }
+                });
+            }
+                           
+                        },
+                        {
+                            xtype: 'button',
+                            text: 'Generate I983',
+                            reference: 'I983',
+                            hidden: true,
+                            handler: function() {
+                                var email = 'mellamarthy1@gmail.com';
+                                Ext.Ajax.request({
+                    url: 'http://localhost:8080/api/updateI983-pdf',
+                    method: 'POST',
+                    params: {
+                        email: email
+                    },
+                    success: function(response) {
+                        Ext.Msg.alert('Success', response.responseText);
+                    },
+                    failure: function() {
+                        Ext.Msg.alert('Failure', 'Failed to update PDF.');
+                    }
+                });
+            }
+                           
                         }
+            
                     ]
                 },
              

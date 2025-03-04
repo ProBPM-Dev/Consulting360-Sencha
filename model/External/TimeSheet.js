@@ -11,14 +11,26 @@ Ext.define('Consulting.desktop.src.model.External.TimeSheet', {
         {name: 'day6',  type: 'number'},
         {name: 'day7',  type: 'number'},
         {name: 'startDate',type: 'date'},
-        {name: 'endDate',type: 'date'}
-    ],
-    proxy: {
-        type: 'rest',
-        url : 'http://localhost:8080/api/getTimeSheets/tcs',
-        reader: {
-            type: 'json',
-            rootProperty: 'content'
+        {name: 'endDate',type: 'date'},
+        { name: 'approvedOn', type: 'date' },
+
+        // Convert 'approvedOn' to an approval status
+        {
+            name: 'approvalStatus',
+            type: 'string',
+            convert: function (value, record) {
+                return record.get('approvedOn') ? 'Approved' : 'Pending';
+            }
+        },
+
+        // Convert 'approvedOn' to an icon class
+        {
+            name: 'approvalIcon',
+            type: 'string',
+            convert: function (value, record) {
+                return record.get('approvedOn') ? 'x-fa fa-lock' : 'x-fa fa-check green';
+            }
         }
-    }
+    
+    ]
 });  

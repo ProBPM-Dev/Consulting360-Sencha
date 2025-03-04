@@ -1,77 +1,7 @@
-Ext.define('Consulting.desktop.src.controller.Timesheet', {
+Ext.define('Consulting.desktop.src.controller.EmployeeExpense', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.Timesheet',
+    alias: 'controller.expense',
 
-
-    config: {
-        checkAll: true,
-        listen: {
-            controller: {
-                "*": {
-                    eventRefreshTimeSheetGrid: 'onRefreshTimeSheetGrid'
-                }
-            }
-        }
-    },
-    init: function() {
-        var poTitleData = localStorage.getItem('POTitle');
-
-        if (poTitleData) {
-            var poTitles = Ext.decode(poTitleData);
-
-            if (poTitles.length > 0) {
-                this.getViewModel().set("selectedPO", poTitles[0]);
-            }
-        }
-    },
-    onCellTap: function(grid, location, eOpts) {
-        var target = location.event.target; // Get the clicked element
-        var record = location.record; // Get the record associated with the clicked row
-        var column = location.column; // Get the column associated with the clicked cell
-    
-        // Check if the clicked element is the edit icon
-        if (target && target.classList.contains('edit-icon')) {
-            console.log('Edit icon clicked:', {
-                record: record.getData(),
-                column: column.getText(),
-                value: record.get(column.dataIndex)
-            });
-    
-            // Get the selectedPO from the ViewModel
-            var selectedPO = this.getViewModel().get("selectedPO");
-    
-            // Ensure the record is not approved and selectedPO is defined
-            if (!record.get('approvedOn') && selectedPO) {
-                console.log('Firing eventEditTimeSheet...');
-                this.fireEvent("eventEditTimeSheet", record, selectedPO);
-            } else {
-                console.log('Record is already approved or selectedPO is not defined.');
-            }
-        }
-    },
-    onRefreshTimeSheetGrid  :   function(selectedPO){
-        
-        this.getViewModel().set("selectedPO",selectedPO);
-        this.getViewModel().getStore('timesheet').load();
-    },
-    onStoreBeforeLoad   :   function(store, operation, eOpts){
-        var val = this.getViewModel().get("selectedPO");
-        var url = this.getViewModel().get("url");
-        store.getProxy().url = url + val.id;
-    },
-    onEdit:function(grid, info){
-        var val = this.getViewModel().get("selectedPO");
-        this.fireEvent("eventEditTimeSheet", info.record,val);
-    },
-    
-    
-    onCreateTimesheetButtonClick: function (button) {
-        console.log("firing event");
-        this.fireEvent("eventCreateTimeSheet",this.getViewModel().get("selectedPO"));
-    },
-
-
-    // To show all filters from activeFilter object and syncing grid data
     onShowFilters: function(menu) {
         var filterPlugin = this.getView().getPlugin('gridfilters') || {},
             filters = filterPlugin.getActiveFilter() || [],
@@ -79,7 +9,6 @@ Ext.define('Consulting.desktop.src.controller.Timesheet', {
             columns = this.getView().getColumns(),
             currColumn, i, j, currFilter, value, filterConfig, filterItem;
 
-        // creating a colmap for mapping data index to name and xtype of column
         for (i = 1; i < columns.length; i++) {
             currColumn = columns[i];
             colMap[currColumn.getDataIndex()] = {
@@ -87,7 +16,6 @@ Ext.define('Consulting.desktop.src.controller.Timesheet', {
                 xtype: currColumn.xtype
             };
         }
-
         for (j in filters) {
             currFilter = filters[j];
             value = currFilter.value;
@@ -114,7 +42,6 @@ Ext.define('Consulting.desktop.src.controller.Timesheet', {
         }
     },
 
-    // This will return activeFilter after adding new filter
     addFilter: function(currFilter) {
         var count = true,
             inCurrFilter, j,
@@ -123,7 +50,7 @@ Ext.define('Consulting.desktop.src.controller.Timesheet', {
 
         for (j in inFilters) {
             inCurrFilter = inFilters[j];
-           
+
             if (inCurrFilter.property === currFilter.property &&
                 inCurrFilter.value === currFilter.value &&
                 inCurrFilter.operator === currFilter.operator) {
@@ -138,7 +65,6 @@ Ext.define('Consulting.desktop.src.controller.Timesheet', {
         return inFilters;
     },
 
-    // This will return activeFilter after removing filter
     removeFilter: function(currFilter) {
         var filters = [],
             inCurrFilter, j,
@@ -157,7 +83,6 @@ Ext.define('Consulting.desktop.src.controller.Timesheet', {
         return filters;
     },
 
-    // This will run when closing all-filter dropdown
     onHideFilters: function(menu) {
         var menuItems = menu.getItems(),
             k, allFilterItem;
@@ -170,45 +95,22 @@ Ext.define('Consulting.desktop.src.controller.Timesheet', {
         allFilterItem.setChecked(true);
     },
 
-    // This will run when any individual item will get enable/disable
     toggleFilterItem: function(filterItem) {
         var me = filterItem,
             filterApply;
 
         if (me.getChecked()) {
             filterApply = this.addFilter(me.filterConfig);
-        }
-        else {
+        } else {
             filterApply = this.removeFilter(me.filterConfig);
         }
 
-        // To sync all filter
-        this.syncAllFIlters();
+        this.syncAllFilters();
 
-        // This would update activeFilter and sync grid data
         this.getView().getPlugin('gridfilters').setActiveFilter(filterApply);
     },
 
-    // This will run all filter option enable/disable
-    handleAllFilters: function(allFilterItem) {
-        var isChecked = allFilterItem.getChecked(),
-            i,
-            filterButton = this.lookupReference('ShowFilters'),
-            menuItems = filterButton.getMenu().getItems().items;
-
-        if (isChecked) {
-            this.setCheckAll(true);
-        }
-
-        if (this.getCheckAll()) {
-            for (i = 2; i < menuItems.length; i++) {
-                menuItems[i].setChecked(isChecked);
-            }
-        }
-    },
-
-    // This will run all filter option enable/disable
-    syncAllFIlters: function() {
+    syncAllFilters: function() {
         var allFilterItem = this.lookupReference('allFilter'),
             isChecked = true,
             i,
@@ -220,12 +122,55 @@ Ext.define('Consulting.desktop.src.controller.Timesheet', {
                 isChecked = false;
                 this.setCheckAll(false);
                 break;
-            }
-            else {
+            } else {
                 this.setCheckAll(true);
             }
         }
-
         allFilterItem.setChecked(isChecked);
-    }
+    },
+
+    handleAllFilters: function(allFilterItem) {
+        var isChecked = allFilterItem.getChecked(),
+            i,
+            filterButton = this.lookupReference('ShowFilters'),
+            menuItems = filterButton.getMenu().getItems().items,
+            filters = [];
+
+        if (isChecked) {
+            for (i = 2; i < menuItems.length; i++) {
+                filters.push(menuItems[i].filterConfig);
+            }
+        }
+        this.getView().getPlugin('gridfilters').setActiveFilter(filters);
+    },
+
+    onShowExpensePanel: function() {
+        // Get a reference to the east panel
+        var eastPanel = this.getView().up('mainview').down('eastpanel'); // Use 'mainview' instead of 'viewport'
+
+        if (eastPanel) {
+            // Enable the panel if it's disabled
+            eastPanel.setDisabled(false);
+
+            // Expand the panel if it's collapsed
+            if (eastPanel.collapsed) {
+                eastPanel.setCollapsed(false);
+            }
+
+            // Bring the panel into focus
+            eastPanel.show();
+        } else {
+            Ext.Msg.alert('Error', 'Expense Panel not found.');
+        }
+    },
+
+    onSubmitExpense: function() {
+        // Handle form submission logic here
+        var form = this.getView().up('mainview').down('eastpanel').getForm(); // Use 'mainview' instead of 'viewport'
+        if (form.isValid()) {
+            Ext.Msg.alert('Success', 'Expense submitted successfully.');
+        } else {
+            Ext.Msg.alert('Error', 'Please fill out all required fields.');
+        }
+    },
 });

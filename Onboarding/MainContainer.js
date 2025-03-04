@@ -33,7 +33,7 @@ Ext.define('Consulting.desktop.src.view.Onboarding.MainContainer', {
             itemId: 'card-prev',
             xtype: 'button',
             text: '&laquo; Previous',
-            handler: 'showPrevious',
+            handler: 'onPreviousButtonClick', 
             bind: {
                 disabled: '{isPrevDisabled}'
             }
@@ -44,12 +44,11 @@ Ext.define('Consulting.desktop.src.view.Onboarding.MainContainer', {
             text: 'Reset',
             handler: 'showReset',
         },
-        
         {
             itemId: 'card-next',
             xtype: 'button',
             text: 'Save and Next &raquo;',
-            handler:  'saveCurrentSection',
+            handler: 'onSaveNextButtonClick', 
             bind: {
                 disabled: '{isNextDisabled}'
             }

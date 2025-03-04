@@ -3,10 +3,10 @@ Ext.define('Consulting.desktop.src.view.Onboarding.IdentityInfo', {
     extend: 'Ext.form.Panel',
     alias: 'widget.identityInfo',
     requires: [
-        'Consulting.desktop.src.view.Onboarding.OnboardingController'
+        'Consulting.desktop.src.controller.IdentityInfoController'
     ],
     layout: 'vbox', 
-    controller: 'Onboarding',
+    controller: 'identityInfo',
     scrollable: true,
     bodyPadding: 20,
     width: '100%',
@@ -35,7 +35,7 @@ Ext.define('Consulting.desktop.src.view.Onboarding.IdentityInfo', {
         },
         data: {
             person: {} ,
-            identityType: null
+            //identityType: null
         }
 
     },
@@ -175,6 +175,7 @@ Ext.define('Consulting.desktop.src.view.Onboarding.IdentityInfo', {
                                         xtype: 'textfield',
                                         label: 'Temporary Address Line 1',
                                         name: 'tempaddressLine1',
+                                        bind:'{person.addressLine1}',
                                         allowBlank: false,
                                         blankText: 'Please enter a valid Address'
                                     },
@@ -183,27 +184,31 @@ Ext.define('Consulting.desktop.src.view.Onboarding.IdentityInfo', {
                                         label: 'Temporary City',
                                         name: 'tempCity',
                                         allowBlank: false,
-                                        blankText: 'Please enter a valid City'
+                                        blankText: 'Please enter a valid City',
+                                         bind:'{person.city}'
                                     },
                                     {
                                         xtype: 'textfield',
                                         label: 'Temporary State',
                                         name: 'tempState',
                                         allowBlank: false,
-                                        blankText: 'Please enter a valid State'
+                                        blankText: 'Please enter a valid State',
+                                        bind:'{person.state}'
                                     },
                                     {
                                         xtype: 'textfield',
                                         label: 'Temporary Country',
                                         name: 'tempCountry',
                                         allowBlank: false,
-                                        blankText: 'Please enter a valid Country'
+                                        blankText: 'Please enter a valid Country',
+                                         bind:'{person.country}'
                                     },
                                     {
                                         xtype: 'textfield',
                                         label: 'Temporary Pincode',
                                         name: 'tempzipCode',
                                         allowBlank: false,
+                                           bind:'{person.zipCode}',
                                         blankText: 'Please enter a valid Pincode'
                                     }
                                 ]
