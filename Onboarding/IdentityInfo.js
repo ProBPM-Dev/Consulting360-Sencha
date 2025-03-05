@@ -35,7 +35,7 @@ Ext.define('Consulting.desktop.src.view.Onboarding.IdentityInfo', {
         },
         data: {
             person: {} ,
-            //identityType: null
+            identityType: null
         }
 
     },
@@ -63,9 +63,9 @@ Ext.define('Consulting.desktop.src.view.Onboarding.IdentityInfo', {
                             store: {
                                 fields: ['label', 'value'],
                                 data: [
-                                    { label: 'Driving License', value: '3' },
-                                    { label: 'State ID', value: '4' },
-                                    { label: 'Temporary Address', value: '5' }
+                                    { label: 'Driving License', value: 'DL' },
+                                    { label: 'State ID', value: 'SID' },
+                                    { label: 'Temporary Address', value: 'TA' }
                                 ]
                             },
                             queryMode: 'local',
@@ -75,6 +75,10 @@ Ext.define('Consulting.desktop.src.view.Onboarding.IdentityInfo', {
                             allowBlank: false,
                             blankText: 'Choose an identity type',
                             //bind: '{identityType}'  // Bind to ViewModel
+                            listeners: {
+                                
+                                change: 'onIdentityTypeChange' // Bind to the controller method
+                            }
                         },
                        {
                                 xtype: 'textfield',

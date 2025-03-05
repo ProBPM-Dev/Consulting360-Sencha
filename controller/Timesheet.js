@@ -13,17 +13,7 @@ Ext.define('Consulting.desktop.src.controller.Timesheet', {
             }
         }
     },
-    init: function() {
-        var poTitleData = localStorage.getItem('POTitle');
-
-        if (poTitleData) {
-            var poTitles = Ext.decode(poTitleData);
-
-            if (poTitles.length > 0) {
-                this.getViewModel().set("selectedPO", poTitles[0]);
-            }
-        }
-    },
+ 
     onCellTap: function(grid, location, eOpts) {
         var target = location.event.target; // Get the clicked element
         var record = location.record; // Get the record associated with the clicked row

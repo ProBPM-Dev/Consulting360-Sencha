@@ -22,17 +22,19 @@ Ext.define('Consulting.desktop.src.view.External.TimeSheetEnvelope', {
             }
         },
     },
-    tbar:[{
+    tbar: [{
         xtype: 'selectfield',
+        reference: 'poTitleCombo', // Add a reference for easy access
         label: 'Customer',
-        queryMode: 'remote',
-        displayField: 'name',
-        valueField: 'id',
+        queryMode: 'local', // Use 'local' if the store is already loaded
+        displayField: 'name', // Field to display in the dropdown
+        valueField: 'id', // Field to use as the value
         bind: {
-            store: '{POTitle}' 
+            store: '{POTitle}', // Bind to the POTitle store
+            value: '{selectedPO.id}' // Bind to the selectedPO in the ViewModel
         },
-        listeners:{
-            select:'onPOSelection'
+        listeners: {
+            select: 'onPOSelection' // Handle selection event
         }
     }],
     items: [{

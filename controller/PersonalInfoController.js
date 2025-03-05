@@ -5,8 +5,8 @@ Ext.define('Consulting.desktop.src.controller.PersonalInfoController', {
         this.listen({
             controller: {
                 '*': {
-                    personalInfoPrevious: this.onPrevious,
-                    personalInfoSaveNext: this.onSaveNext
+                    EventpersonalInfoPrevious: this.onPrevious,
+                    EventpersonalInfoSaveNext: this.onSaveNext
                 }
             }
         });
@@ -32,15 +32,10 @@ Ext.define('Consulting.desktop.src.controller.PersonalInfoController', {
         Ext.Msg.confirm('Confirm', 'Are you sure?', 'onConfirm', this);
     },
 
-    formatData: function (panel, values, options, e, eOpts) {
-        if (values.dob) {
-            values.dob = Ext.Date.format(values.dob, 'Y-m-d\\TH:i:s.000');
-        }
-    },
 
     onPrevious: function(panel) {
         console.log('Previous button clicked on Personal Info panel');
-        // Add logic to handle the "Previous" action for the Personal Info panel
+        
     },
 
     onSaveNext: function(panel) {
@@ -49,27 +44,26 @@ Ext.define('Consulting.desktop.src.controller.PersonalInfoController', {
            
             this.saveCurrentSection();
         } else {
-            Ext.Msg.alert('Invalid Data', 'Please correct the errors in the form before submitting.');
+            Ext.Msg.alert('Invalid Data', 'Please enter all mandate fields in the form before submitting.');
         }
     },
 
     saveCurrentSection: function() {
-        debugger;
+    var me =this;
         var form = this.getView();
-        var mainContainer = this.getView().up('onboardingPanel'); // Traverse up to the MainContainer
-        var mainController = mainContainer.getController(); // Get the OnboardingController
-
+        var currentPanel = this.getView().getActiveItem();
         form.submit({
             url: 'http://localhost:8080/api/saveLoggedInEmployee',
             method: 'POST',
 
             success: function(form, action) {
                 Ext.Msg.alert('Success', 'Form submitted successfully!');
-                mainController.showNext();
+                me.fireEvent('saveFormSuccess');
             },
             failure: function(form, action) {
+      
                 Ext.Msg.alert('Failed', 'Form submission failed. Please try again.');
-                mainController.showNext();
+                me.fireEvent('saveFormSuccess');
             },
   
         });

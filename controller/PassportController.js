@@ -6,8 +6,8 @@ Ext.define('Consulting.desktop.src.controller.PassportController', {
         this.listen({
             controller: {
                 '*': {
-                    passportDetailsPrevious: this.onPrevious,
-                    passportDetailsSaveNext: this.onSaveNext
+                    EventpassportDetailsPrevious: this.onPrevious,
+                    EventpassportDetailsSaveNext: this.onSaveNext
                 }
             }
         });
@@ -28,10 +28,9 @@ Ext.define('Consulting.desktop.src.controller.PassportController', {
               console.error('Person store is not available.');
           }},
     onPrevious: function(panel) {
+        var me =this;
         console.log('Previous button clicked on Passport Details panel');
-        var mainContainer = this.getView().up('onboardingPanel'); // Traverse up to the MainContainer
-        var mainController = mainContainer.getController(); // Get the OnboardingController
-        mainController.showPrevious(); 
+        me.fireEvent('onPreviousEvent');
      },
 
     onSaveNext: function(panel) {
@@ -45,16 +44,15 @@ Ext.define('Consulting.desktop.src.controller.PassportController', {
 
     saveCurrentSection: function() {
         var form = this.getView();
-    //    var mainContainer = this.getView().up('onboardingPanel'); // Traverse up to the MainContainer
-    //    var mainController = mainContainer.getController(); // Get the OnboardingController
-debugger;
+        var me =this;
+
         form.submit({
             url: 'http://localhost:8080/api/saveLoggedInEmployeePassportInfo', // Update the URL for Passport Info
             method: 'POST',
             success: function(form, action) {
                 Ext.Msg.alert('Success', 'Form submitted successfully!');
-            //    mainController.showNext(); // Call showNext in OnboardingController
-            },
+                me.fireEvent('saveFormSuccess');
+             },
             failure: function(form, action) {
                 var response = action.response;
                 if (response && response.responseText) {

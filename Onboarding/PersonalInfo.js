@@ -1,4 +1,3 @@
-
 Ext.define('Consulting.desktop.src.view.Onboarding.PersonalInfo', {
     extend: 'Ext.form.Panel',
     alias: 'widget.personalInfo',
@@ -10,7 +9,7 @@ Ext.define('Consulting.desktop.src.view.Onboarding.PersonalInfo', {
     scrollable: true,
     bodyPadding: 20,
     width: '100%',
-    viewModel:{
+    viewModel: {
         stores: {
             personStore: {
                 type: 'store',
@@ -23,13 +22,11 @@ Ext.define('Consulting.desktop.src.view.Onboarding.PersonalInfo', {
                         type: 'json'
                     }
                 },
-              
             }
         },
         data: {
             person: {} // Initialize with an empty object
         }
-    
     },
     listeners: {
         show: 'onAfterRender'
@@ -54,84 +51,92 @@ Ext.define('Consulting.desktop.src.view.Onboarding.PersonalInfo', {
                     xtype: 'textfield',
                     label: 'First Name',
                     name: 'firstname',
-                    allowBlank: false,
+                    required: true,  // Modern Toolkit uses 'required' instead of 'allowBlank'
                     bind: '{person.firstname}',
-                    blankText: 'First Name is required',
-                    errorTarget: 'qtip'
+                     validateOnBlur: true, 
+                    errorMessage: 'First Name is required'
                 },
                 {
                     xtype: 'textfield',
                     label: 'Last Name',
                     labelAlign: 'placeholder',
                     name: 'lastname',
+                    required: true,
                     bind: '{person.lastname}',
-                    allowBlank: false,
-                    blankText: 'Last Name is required'
+                     validateOnBlur: true, 
+                    errorMessage: 'Last Name is required'
                 },
                 {
                     xtype: 'textfield',
                     label: 'SSN',
                     labelAlign: 'placeholder',
                     name: 'ssn',
-                    bind: '{person.ssn}', 
-                    allowBlank: false,
-                    blankText: 'SSN is required',
-                    regex: /^[0-9]{2}-[0-9]{2}-[0-9]{3}$/,
-                    regexText: 'SSN should be in the format 11-22-333'
+                    bind: '{person.ssn}',
+                    required: true,
+                    errorMessage: 'SSN is required',
+                     validateOnBlur: true, 
+                    validators: {
+                        type: 'format',
+                        matcher: /^[0-9]{2}-[0-9]{2}-[0-9]{3}$/,
+                        message: 'SSN should be in the format 11-22-333'
+                    }
                 },
                 {
                     xtype: 'textfield',
                     label: 'Phone Number',
                     labelAlign: 'placeholder',
+                     validateOnBlur: true, 
                     name: 'phonenumber',
-                    allowBlank: false,
+                    required: true,
                     bind: '{person.phonenumber}',
-                    blankText: 'Phone Number is required',
-                    regex: /^[0-9]{10}$/,
-                    regexText: 'Please enter a valid 10-digit mobile number'
+                    errorMessage: 'Phone Number is required',
+                    validators: {
+                        type: 'format',
+                        matcher: /^[0-9]{10}$/,
+                        message: 'Please enter a valid 10-digit mobile number'
+                    }
                 },
                 {
-                    xtype: 'datefield',
+                    xtype: 'datepickerfield',
                     label: 'Date Of Birth',
                     labelAlign: 'placeholder',
+                     validateOnBlur: true, 
                     name: 'dob',
                     reference: 'dobField',
-                    allowBlank: false,
+                    required: true,
                     bind: '{person.dob}',
                     maxValue: new Date(),
-                    blankText: 'Date Of Birth is required'
+                    errorMessage: 'Date Of Birth is required'
                 },
                 {
-                xtype: 'textfield',
-                label: 'Highest Degree',
-                name: 'highestDegree',
-                displayField: 'label',
-                valueField: 'value',
-                bind: '{person.highestDegree}',
-                allowBlank: false,
-                blankText: 'HighestDegree is required',
-              
-            },
-            {
-                xtype: 'textfield',
-                label: 'University Name',
-                name: 'univeristyName',
-                bind: '{person.univeristyName}',
-                allowBlank: false,
-                blankText: 'University Name is required'
-            },
-            {
-                xtype: 'datefield',
-                label: 'Course Completion',
-                name: 'courseCompletionDate',
-                bind: '{person.courseCompletionDate}',
-                format: 'm/d/Y',
-                allowBlank: false,
-                blankText: 'Course Completion Date is required'
-            }
+                    xtype: 'textfield',
+                    label: 'Highest Degree',
+                    name: 'highestDegree',
+                    bind: '{person.highestDegree}',
+                     validateOnBlur: true, 
+                    required: true,
+                    errorMessage: 'Highest Degree is required'
+                },
+                {
+                    xtype: 'textfield',
+                    label: 'University Name',
+                    name: 'univeristyName',
+                    bind: '{person.univeristyName}',
+                     validateOnBlur: true, 
+                    required: true,
+                    errorMessage: 'University Name is required'
+                },
+                {
+                    xtype: 'datepickerfield',
+                    label: 'Course Completion',
+                    name: 'courseCompletionDate',
+                    bind: '{person.courseCompletionDate}',
+                    dateFormat: 'm/d/Y',
+                     validateOnBlur: true, 
+                    required: true,
+                    errorMessage: 'Course Completion Date is required'
+                }
             ]
-        },
-   
-    ],
-    
+        }
+    ]
 });

@@ -9,6 +9,7 @@ Ext.define('Consulting.desktop.src.view.Onboarding.MainContainer', {
         'Consulting.desktop.src.view.Onboarding.EmergencyContactDetails',
         'Consulting.desktop.src.view.Onboarding.PassportDetails',
         'Consulting.desktop.src.view.Onboarding.WorkAuthorization',
+        'Consulting.desktop.src.view.Onboarding.i983Panel',
         'Ext.layout.Card',
         'Consulting.desktop.src.view.Onboarding.OnboardingController'
     ],
@@ -26,7 +27,8 @@ Ext.define('Consulting.desktop.src.view.Onboarding.MainContainer', {
         { xtype: 'identityInfo', itemId: 'identityInfo' },
         { xtype: 'emergencyContactDetails', itemId: 'emergencyContactDetails' },
         { xtype: 'passportDetails', itemId: 'passportDetails' },
-        { xtype: 'workAuthorization', itemId: 'workAuthorization' }
+        { xtype: 'workAuthorization', itemId: 'workAuthorization' },
+        { xtype: 'i983Panel', itemId: 'i983Panel' } 
     ],
     bbar: ['->',
         {

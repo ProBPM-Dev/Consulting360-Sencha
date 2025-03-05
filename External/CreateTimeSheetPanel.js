@@ -13,7 +13,8 @@ Ext.define('Consulting.desktop.src.view.External.CreateTimeSheetPanel', {
     },
     
     listeners:{
-        beforeexpand:'onBeforeExpand'
+        beforeexpand:'onBeforeExpand',
+         afterrender: 'onAfterRender'
     },
     layout: 'vbox',
     viewModel:{
@@ -119,6 +120,13 @@ Ext.define('Consulting.desktop.src.view.External.CreateTimeSheetPanel', {
                         type: 'format',
                         matcher: /^\d+(\.\d{1,2})?$/
                     }
+                },
+                {
+                    xtype: 'filefield',
+                    label: 'Attach Timesheet',
+                    name: 'timesheetDocument',
+                    buttonText: 'Select File...',
+                    accept: 'application/pdf, image/*'
                 }
             ]
         },

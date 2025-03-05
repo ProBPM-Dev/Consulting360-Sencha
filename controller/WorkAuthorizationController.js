@@ -6,8 +6,8 @@ Ext.define('Consulting.desktop.src.controller.WorkAuthorizationController', {
         this.listen({
             controller: {
                 '*': {
-                    workAuthorizationPrevious: this.onPrevious,
-                    workAuthorizationSaveNext: this.onSaveNext
+                    EventworkAuthorizationPrevious: this.onPrevious,
+                    EventworkAuthorizationSaveNext: this.onSaveNext
                 }
             }
         });
@@ -28,10 +28,10 @@ Ext.define('Consulting.desktop.src.controller.WorkAuthorizationController', {
               console.error('Person store is not available.');
           }},
     onPrevious: function(panel) {
+        var me =this;
         console.log('Previous button clicked on Work Authorization panel');
-        var mainContainer = this.getView().up('onboardingPanel'); // Traverse up to the MainContainer
-        var mainController = mainContainer.getController(); // Get the OnboardingController
-        mainController.showPrevious(); 
+        me.fireEvent('onPreviousEvent');
+        debugger;
       },
 
     onSaveNext: function(panel) {
@@ -45,15 +45,13 @@ Ext.define('Consulting.desktop.src.controller.WorkAuthorizationController', {
 
     saveCurrentSection: function() {
         var form = this.getView();
-        var mainContainer = this.getView().up('onboardingPanel'); // Traverse up to the MainContainer
-        var mainController = mainContainer.getController(); // Get the OnboardingController
-
+       var me =this;
         form.submit({
             url: 'http://localhost:8080/api/saveLoggedInEmployeeWorkAuthInfo', // Update the URL for Work Authorization Info
             method: 'POST',
             success: function(form, action) {
                 Ext.Msg.alert('Success', 'Form submitted successfully!');
-                mainController.showNext(); // Call showNext in OnboardingController
+                me.fireEvent('saveFormSuccess');
             },
             failure: function(form, action) {
                 var response = action.response;
@@ -69,5 +67,59 @@ Ext.define('Consulting.desktop.src.controller.WorkAuthorizationController', {
                 }
             }
         });
+    },
+    onWorkAuthChangeBinding: function(newValue) {
+        
+        var combo = this.lookupReference('workAuthLookup'); // Get the combobox reference
+     
+      this.onWorkAuthChange(combo, newValue); // Trigger the change function
+    },
+    onWorkAuthChange: function(combo, newValue) {
+        var view = this.getView();
+        var me=this;
+        var refs = this.getReferences();
+        refs.uscisNumberField.setHidden(true);
+        refs.validFromField.setHidden(true);
+        refs.validToField.setHidden(true);
+        refs.attachDocField.setHidden(true);
+        refs.i20Field.setHidden(true);
+        refs.CPTdocField.setHidden(true);
+        refs.jobDutiesField.setHidden(true);
+        refs.sevisid.setHidden(true);
+        refs.sevisschool.setHidden(true);
+        refs.DSO.setHidden(true);
+        refs.dateawarded.setHidden(true);    
+        refs.CIP.setHidden(true);
+        refs.EAD.setHidden(true);
+        refs.I983.setHidden(true);
+        refs.I9.setHidden(false);
+        refs.StudentRole.setHidden(true);
+        refs.Goals.setHidden(true);
+        switch(newValue) {
+            case 'h1b':
+                refs.jobDutiesField.setHidden(false);
+                refs.h1bdocField.setHidden(false);
+                break;
+            case 'cpt':
+                refs.i20Field.setHidden(false);
+                refs.CPTdocField.setHidden(false);
+                break;
+            case 'cap':
+                refs.jobDutiesField.setHidden(false);
+              //  refs.i94docField.setHidden(false);
+                break;
+            case 'i983 Master':
+                debugger;
+                me.fireEvent('saveFormSuccess');
+            default:
+                var showFields = ['opt', 'h4ead', 'gc', 'gcead'].includes(newValue);
+                refs.uscisNumberField.setHidden(!showFields);
+                refs.validFromField.setHidden(!showFields);
+                refs.validToField.setHidden(!showFields);
+                refs.attachDocField.setHidden(!showFields);
+                break;
+        }
     }
+
+
 });

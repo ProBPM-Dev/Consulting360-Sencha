@@ -6,8 +6,8 @@ Ext.define('Consulting.desktop.src.controller.IdentityInfoController', {
         this.listen({
             controller: {
                 '*': {
-                    identityInfoPrevious: this.onPrevious,
-                    identityInfoSaveNext: this.onSaveNext
+                    EventidentityInfoPrevious: this.onPrevious,
+                    EventidentityInfoSaveNext: this.onSaveNext
                 }
             }
         });
@@ -29,10 +29,9 @@ Ext.define('Consulting.desktop.src.controller.IdentityInfoController', {
           }},
           
     onPrevious: function(panel) {
+        var me=this;
         console.log('Previous button clicked on Identity Info panel');
-        var mainContainer = this.getView().up('onboardingPanel'); // Traverse up to the MainContainer
-        var mainController = mainContainer.getController(); // Get the OnboardingController
-        mainController.showPrevious(); 
+        me.fireEvent('onPreviousEvent');
     },
 
     onSaveNext: function(panel) {
@@ -46,13 +45,13 @@ Ext.define('Consulting.desktop.src.controller.IdentityInfoController', {
 
     saveCurrentSection: function() {
         var form = this.getView();
-      //  var mainContainer = this.getView().up('onboardingPanel'); // Traverse up to the MainContainer
-        //var mainController = mainContainer.getController(); // Get the OnboardingController
-        debugger;
+        var me=this;
+   
         form.submit({
             url: 'http://localhost:8080/api/saveLoggedInEmployeeIdentityInfo',
             method: 'POST',
             success: function(form, action) {
+                me.fireEvent('saveFormSuccess');
                 Ext.Msg.alert('Success', 'Form submitted successfully!');
                // mainController.showNext();
             },
@@ -61,14 +60,30 @@ Ext.define('Consulting.desktop.src.controller.IdentityInfoController', {
                 if (response && response.responseText) {
                     try {
                         var jsonResponse = Ext.JSON.decode(response.responseText);
+                        
                         Ext.Msg.alert('Failed', jsonResponse.message || 'Form submission failed. Please try again.');
                     } catch (e) {
                         Ext.Msg.alert('Failed', 'Invalid server response. Please try again.');
                     }
                 } else {
+
                     Ext.Msg.alert('Failed', 'Server is not reachable. Please try again.');
                 }
             }
         });
+    },
+    onIdentityTypeChange: function(combo, newValue) {
+        debugger;
+        var identityNumberField = this.lookupReference('identityNumberField');
+        if (identityNumberField) {
+            if (newValue === 'TA') {
+                identityNumberField.allowBlank = true;
+                identityNumberField.setHidden(true);
+            } else {
+                identityNumberField.allowBlank = false;
+                identityNumberField.setHidden(false);
+            }
+            identityNumberField.validate();
+        }
     }
 });

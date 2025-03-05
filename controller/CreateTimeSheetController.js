@@ -35,6 +35,10 @@ Ext.define('Consulting.desktop.src.controller.CreateTimeSheetController', {
         return this.getViewModel().get("openPanel");
 
     },
+    onAfterRender: function(panel) {
+        // Disable the collapse/expand functionality
+        panel.setCollapsible(false);
+    },
     isHoliday: function(day) {
         var holidayData = Ext.decode(localStorage.getItem('staticData')) || [];
     
