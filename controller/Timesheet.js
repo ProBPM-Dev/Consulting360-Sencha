@@ -8,12 +8,88 @@ Ext.define('Consulting.desktop.src.controller.Timesheet', {
         listen: {
             controller: {
                 "*": {
-                    eventRefreshTimeSheetGrid: 'onRefreshTimeSheetGrid'
+                    eventRefreshTimeSheetGrid: 'onRefreshTimeSheetGrid',
+                
                 }
             }
         }
     },
  
+    showFilePopup: function(attachmentId, fileName, fileType) {
+        var fileUrl = 'http://localhost:8080/api/getTSAttachment/' + attachmentId;
+    
+        var popup = Ext.create('Ext.Window', {
+            title: fileName,
+            width: 800,
+            height: 600,
+            layout: 'fit',
+            modal: true,
+            closable: true, // Allow closing with the close button
+            closeAction: 'hide', // Hide the window instead of destroying it
+            tbar: [
+                {
+                    text: 'Download',
+                    iconCls: 'x-fa fa-download',
+                    handler: function() {
+                        // Trigger file download
+                        var link = document.createElement('a');
+                        link.href = fileUrl;
+                        link.download = fileName; // Set the filename for download
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+                },
+                '->', // Add a spacer to push the close button to the right
+                {
+                    text: 'Close',
+                    iconCls: 'x-fa fa-times',
+                    handler: function() {
+                        popup.close(); // Close the popup
+                    }
+                }
+            ],
+            items: []
+        });
+    
+        // Handle ESC key to close the popup
+        popup.on('render', function() {
+            var popupEl = popup.getEl();
+            popupEl.on('keydown', function(e) {
+                if (e.getKey() === e.ESC) {
+                    popup.close(); // Close the popup on ESC key
+                }
+            });
+        });
+    
+        // Add file content based on file type
+        if (fileType.startsWith('image/')) {
+            // Display image
+            popup.add({
+                xtype: 'component',
+                autoEl: {
+                    tag: 'img',
+                    src: fileUrl,
+                    style: 'width: 100%; height: 100%; object-fit: contain;'
+                }
+            });
+        } else if (fileType === 'application/pdf') {
+            // Display PDF in an iframe
+            popup.add({
+                xtype: 'component',
+                autoEl: {
+                    tag: 'iframe',
+                    src: fileUrl,
+                    style: 'width: 100%; height: 100%; border: none;'
+                }
+            });
+        } else {
+            Ext.Msg.alert('Info', 'Unsupported file type: ' + fileType);
+            return;
+        }
+    
+        popup.show();
+    },
     onCellTap: function(grid, location, eOpts) {
         var target = location.event.target; // Get the clicked element
         var record = location.record; // Get the record associated with the clicked row
@@ -37,6 +113,31 @@ Ext.define('Consulting.desktop.src.controller.Timesheet', {
             } else {
                 console.log('Record is already approved or selectedPO is not defined.');
             }
+        }
+    
+        // Check if the clicked element is the download icon in the "Attachment" column
+        if (target && target.classList.contains('download-icon')) {
+            console.log('Download icon clicked:', {
+                record: record.getData(),
+                column: column.getText(),
+                value: record.get(column.dataIndex)
+            });
+    debugger;
+            // Get the empTimeAttachments array from the record
+            var attachments = record.get('empTimeAttachments');
+            if (attachments && attachments.length > 0) {
+                // Use the first attachment's details
+                var attachment = attachments[0];
+                var attachmentId = attachment.id;
+                var fileName = attachment.fileName;
+                var fileType = attachment.fileType;
+    
+                // Show the file in a popup
+                this.showFilePopup(attachmentId, fileName, fileType);
+            } else {
+                Ext.Msg.alert('Info', 'No attachment available for this timesheet.');
+            }
+
         }
     },
     onRefreshTimeSheetGrid  :   function(selectedPO){

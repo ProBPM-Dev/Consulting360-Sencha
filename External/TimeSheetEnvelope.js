@@ -45,7 +45,7 @@ Ext.define('Consulting.desktop.src.view.External.TimeSheetEnvelope', {
             height:'100%'
         },
         {
-        xtype: 'CreateTimeSheetPanel',
+        xtype: 'timesheetattach',
         docked: 'right',
         width: '50%',
         collapsible: {

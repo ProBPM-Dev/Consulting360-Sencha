@@ -1,6 +1,5 @@
 Ext.define('Consulting.desktop.src.view.External.CreateTimeSheetPanel', {
     extend: 'Ext.form.Panel',
-    xtype: 'eastpanel',
     alias: 'widget.CreateTimeSheetPanel',
     controller: 'createTimesheet',
     width: 300,
@@ -11,7 +10,9 @@ Ext.define('Consulting.desktop.src.view.External.CreateTimeSheetPanel', {
         collapsible: '{eastCollapseConfig}',
         title:'{panelTitle}'
     },
-    
+    requires: [
+        'Consulting.desktop.src.controller.CreateTimeSheetController'
+    ],
     listeners:{
         beforeexpand:'onBeforeExpand',
          afterrender: 'onAfterRender'
@@ -121,21 +122,10 @@ Ext.define('Consulting.desktop.src.view.External.CreateTimeSheetPanel', {
                         matcher: /^\d+(\.\d{1,2})?$/
                     }
                 },
-                {
-                    xtype: 'filefield',
-                    label: 'Attach Timesheet',
-                    name: 'timesheetDocument',
-                    buttonText: 'Select File...',
-                    accept: 'application/pdf, image/*'
-                }
+
             ]
         },
-        {
-            xtype: 'button',
-            text: 'Submit',
-            formBind: true,
-            margin: '10 0 0 0',
-            handler: 'onSubmitButtonClick'
-        }
+     
+        
     ]
 });

@@ -6,16 +6,17 @@ Ext.define('Consulting.desktop.src.controller.CreateTimeSheetController', {
             controller: {
                 "*": {
                     eventCreateTimeSheet: 'CreateTimeSheet',
-                    eventEditTimeSheet:'editTimeSheet'
+                    eventEditTimeSheet:'editTimeSheet',
+                    eventtimesheetattachSaveNext: 'onSaveAndNext'
                 }
             }
         }
     },
-
-    editTimeSheet:function(record,po){
-        debugger;
  
-
+    editTimeSheet:function(record,po){
+      //  debugger;
+ 
+        var me=this;
         console.log(record);
         var vm = this.getViewModel();
         vm.set("po",po);
@@ -29,6 +30,7 @@ Ext.define('Consulting.desktop.src.controller.CreateTimeSheetController', {
                 panel.expand();
             }
         }
+        me.fireEvent('eventexpandpanel');
     },
     onBeforeExpand:function(panel){
         console.log(this.getViewModel().get("openPanel"));
@@ -106,6 +108,9 @@ Ext.define('Consulting.desktop.src.controller.CreateTimeSheetController', {
                     Ext.Msg.alert('Error', 'Failed to create timesheet.');
                     return;
                 }
+
+vm.set("recordId", responseData.id); // Set the recordId in the ViewModel
+
                 // Fetch the newly created timesheet details
                 var vm = me.getViewModel();
                 me.fireEvent("eventRefreshTimeSheetGrid");
@@ -116,6 +121,7 @@ Ext.define('Consulting.desktop.src.controller.CreateTimeSheetController', {
                 if (panel) {
                     if (panel.collapsed) {
                         panel.expand();
+                        me.fireEvent('eventexpandpanel');
                     }
                 }
             }, // Bind the context to the controller
@@ -125,8 +131,10 @@ Ext.define('Consulting.desktop.src.controller.CreateTimeSheetController', {
         });
     },
 
-    onSubmitButtonClick: function (button) {
+    onSaveAndNext: function (button) {
+  
         var form = this.getView();
+        var me=this;
         if (form.isValid()) {
             var vm = this.getViewModel();
             var po= vm.get("po");
@@ -141,13 +149,20 @@ Ext.define('Consulting.desktop.src.controller.CreateTimeSheetController', {
                     endDate: Ext.Date.format(ed,'U')
                 },
                 success: function(form, action) {
-                    Ext.Msg.alert('Success', 'Form submitted successfully!');
+             
+                    Ext.Msg.alert('Success', 'Form saved successfully!');
+                    me.fireEvent('saveFormSuccess');
+                    me.fireEvent('eventRecordIdUpdated', vm.get("recordId"));
                 },
                 failure: function(form, action) {
+       
                     Ext.Msg.alert('Failed', 'Form submission failed. Please try again.');
+                    me.fireEvent('saveFormSuccess');
+                    me.fireEvent('eventRecordIdUpdated', vm.get("recordId"));
                 },
       
             });
         }
+
     }
 });

@@ -90,6 +90,26 @@ Ext.define('Consulting.desktop.src.view.External.TimeSheet', {
             dataIndex: 'day7'
         }, 
         {
+            text: 'Attachment',
+            dataIndex: 'empTimeAttachments', // Use the empTimeAttachments array
+            flex: 1,
+            renderer: function(value, metaData, record) {
+                if (value && value.length > 0) {
+                    var fileType = value[0].fileType;
+                    if (fileType.startsWith('image/') || fileType === 'application/pdf' || fileType.startsWith('text/')) {
+                        // Display a download icon/button for supported file types
+                        return '<span class="x-fa fa-download download-icon" style="color: #007bff; cursor: pointer;"></span>';
+                    }
+                }
+                return 'No Attachment';
+            },
+            cell: {
+                encodeHtml: false // Ensure HTML is rendered correctly
+            }
+        },
+   
+
+        {
             text: 'Approval',
             dataIndex: 'approvedOn', // Date field
             flex: 1,
