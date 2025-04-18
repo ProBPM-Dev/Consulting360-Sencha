@@ -1,0 +1,10 @@
+{
+  "leaf": false,
+  "children": [
+    { "text": "Onboarding", "iconCls": "x-fa fa-home", "xtype": "onboardingPanel", "leaf": true },
+    { "text": "Test", "iconCls": "x-fa fa-home", "xtype": "ertimesheet", "leaf": true },
+    { "text": "Personnel", "iconCls": "x-fa fa-table", "xtype": "personnelview","leaf": true },
+    { "text": "Timesheets", "iconCls": "x-fa fa-home", "xtype": "timesheetEnvelope", "leaf": true },
+    { "text": "Expense", "iconCls": "x-fa fa-home", "xtype": "expenseEnvelope", "leaf": true }
+  ]
+}
