@@ -51,7 +51,7 @@ Ext.define('Consulting.desktop.src.view.External.TimeSheet', {
     columns: [
         {
             text: 'Week Start Date',
-            dataIndex: 'startDate',
+           dataIndex: 'startDate',
             format: 'm-d-Y',
             xtype: 'datecolumn'
         },

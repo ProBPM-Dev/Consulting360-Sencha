@@ -10,12 +10,32 @@ Ext.define('Consulting.desktop.src.model.External.TimeSheet', {
         {name: 'day5',  type: 'number'},
         {name: 'day6',  type: 'number'},
         {name: 'day7',  type: 'number'},
-        {name: 'startDate',type: 'date'},
-        {name: 'endDate',type: 'date'},
         { name: 'approvedOn', type: 'date' },
-        { name: 'attachmentId', type: 'int' }
+        { name: 'attachmentId', type: 'int' },
         // Convert 'approvedOn' to an approval status
-       
+{
+    name: 'startDate',
+    type: 'date',
+    convert: function (value) {
+        console.log('Raw startDate from API:', value); // ✅ Move this here
+        if (typeof value === 'number' && value < 1000000000000) {
+            return new Date(value * 1000); // Convert seconds to milliseconds
+        }
+        return new Date(value);
+    }
+},
+
+        {
+            name: 'endDate',
+            type: 'date',
+            convert: function (value) {
+                if (typeof value === 'number' && value < 1000000000000) {
+                    return new Date(value * 1000); // Convert from seconds to milliseconds
+                }
+                return new Date(value);
+            }
+        },
+
     
     ]
 });  
