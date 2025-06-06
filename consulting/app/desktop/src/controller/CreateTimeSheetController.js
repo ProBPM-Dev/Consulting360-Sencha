@@ -133,7 +133,7 @@ Ext.define('Consulting.desktop.src.controller.CreateTimeSheetController', {
         });
     },
 
-    onSaveAndNext: function (button) {
+   onSaveAndNext: function (button) {
   debugger;
         var form = this.getView();
         var me=this;
@@ -145,11 +145,12 @@ Ext.define('Consulting.desktop.src.controller.CreateTimeSheetController', {
             form.submit({
                 url: 'http://localhost:8080/api/saveTimeSheetforLoggedInEmployee/' + po.id,
                 method: 'POST',
-                params:{
-                    id:vm.get("recordId"),
-                    startDate: Ext.Date.format(sd,'U'),
-                    endDate: Ext.Date.format(ed,'U')
-                },
+             params: {
+    id: vm.get("recordId"),
+    startDate: sd.getTime(),
+    endDate: ed.getTime()
+},
+
                 success: function(form, action) {
              
                     Ext.Msg.alert('Success', 'Form saved successfully!');

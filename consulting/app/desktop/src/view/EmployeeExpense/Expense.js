@@ -46,12 +46,14 @@ Ext.define('Consulting.desktop.src.view.EmployeeExpense.Expense', {
     },
     rowNumbers: true,
     columns: [
-        {
-            text: 'Expense Date',
-            dataIndex: 'expenseDate',
-            format: 'm-d-Y',
-            xtype: 'datecolumn'
-        },
+ // In your grid column config
+{
+    text: 'Expense Date',
+    dataIndex: 'expenseDate',
+    renderer: function(value) {
+        return value ? Ext.Date.format(new Date(value), 'm/d/Y') : 'N/A';
+    }
+},
         {
             text: 'Category',
             dataIndex: 'expenseCategory',

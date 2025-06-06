@@ -47,9 +47,6 @@ Ext.define('Consulting.desktop.src.controller.CreateExpenseController', {
         panel.setCollapsible(false);
     },
    
-
- 
-
     CreateExpense: function(po) {
         debugger;
         var me= this;
@@ -60,40 +57,60 @@ Ext.define('Consulting.desktop.src.controller.CreateExpenseController', {
            me.fireEvent('eventexpandpanel');
    
     },
-    onSaveAndNext: function (button) {
-        debugger;
-        var form = this.getView();
-        var me = this;
-        var vm = this.getViewModel();
+onSaveAndNext: function(button) {
+    var form = this.getView();
+    var vm = this.getViewModel();
+    var values = form.getValues();
 
-     //   const formattedData = form.getFormattedData(); // Call getFormattedData
-
-        // Log the formatted data for debugging
-        //console.log('Formatted Data:', formattedData);
-        if (form.isValid()) {
-            var po = vm.get("po");
-            form.submit({
-                url: 'http://localhost:8080/api/saveExpenseSheetforLoggedInEmployee/' + po.id,
-                method: 'POST',
-               // jsonData: formattedData,
-        
-                success: function(form, action) {
-                    var responseData = action.response.result;
-                    if (!responseData) {
-                        Ext.Msg.alert('Error', 'Failed to create timesheet.');
-                        return;
-                    }
-                    vm.set("recordId", responseData.id);
-                    Ext.Msg.alert('Success', 'Form saved successfully!');
-                    me.fireEvent('saveFormSuccess');
-                    me.fireEvent('eventRecordIdUpdated', vm.get("recordId"));
-                },
-                failure: function(form, action) {
-                    Ext.Msg.alert('Failed', 'Form submission failed. Please try again.');
-                    me.fireEvent('saveFormSuccess');
-                    me.fireEvent('eventRecordIdUpdated', vm.get("recordId"));
-                }
-            });
+    // Convert expenseDate to milliseconds
+    if (values.expenseDate) {
+        var ts = Number(values.expenseDate);
+        if (ts.toString().length === 10) {
+            values.expenseDate = ts * 1000;
+        } else {
+            values.expenseDate = new Date(values.expenseDate).getTime();
         }
     }
+
+    if (form.isValid()) {
+        form.submit({
+            url: 'http://localhost:8080/api/saveExpenseSheetforLoggedInEmployee/' + vm.get("po").id,
+            method: 'POST',
+            params: {
+                id: values.id || 0,
+                expenseDate: values.expenseDate,
+                amount: values.amount,
+                notes: values.notes || "",
+                "expenseCategory.id": values["expenseCategory.id"] || values.expenseCategory?.id || 0
+            },
+            success: function(form, action) {
+                var responseData = action.result || Ext.decode(action.response.responseText);
+                if (!responseData || !responseData.id) {
+                    Ext.Msg.alert('Error', 'Failed to save expense sheet. Invalid server response.');
+                    return;
+                }
+                vm.set("recordId", responseData.id);
+                Ext.Msg.alert('Success', 'Expense saved successfully!');
+                button.up('form').fireEvent('saveFormSuccess');
+                button.up('form').fireEvent('eventRecordIdUpdated', responseData.id);
+            },
+            failure: function(form, action) {
+                var errorMsg = 'Failed to save expense sheet.';
+                if (action.response && action.response.responseText) {
+                    try {
+                        var json = Ext.decode(action.response.responseText);
+                        errorMsg = json.message || errorMsg;
+                    } catch (e) {
+                        errorMsg = action.response.responseText;
+                    }
+                }
+                Ext.Msg.alert('Error', errorMsg);
+            }
+        });
+    } else {
+        Ext.Msg.alert('Error', 'Please correct form errors before submitting.');
+    }
+}
+
+
 });
