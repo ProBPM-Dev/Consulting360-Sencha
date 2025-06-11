@@ -61,7 +61,7 @@ onSaveAndNext: function(button) {
     var form = this.getView();
     var vm = this.getViewModel();
     var values = form.getValues();
-
+var me=this;
     // Convert expenseDate to milliseconds
     if (values.expenseDate) {
         var ts = Number(values.expenseDate);
@@ -91,8 +91,8 @@ onSaveAndNext: function(button) {
                 }
                 vm.set("recordId", responseData.id);
                 Ext.Msg.alert('Success', 'Expense saved successfully!');
-                button.up('form').fireEvent('saveFormSuccess');
-                button.up('form').fireEvent('eventRecordIdUpdated', responseData.id);
+               me.fireEvent('saveFormSuccess');
+                me.fireEvent('eventRecordIdUpdated', responseData.id);
             },
             failure: function(form, action) {
                 var errorMsg = 'Failed to save expense sheet.';
@@ -104,6 +104,10 @@ onSaveAndNext: function(button) {
                         errorMsg = action.response.responseText;
                     }
                 }
+              debugger;
+              me.fireEvent('saveFormSuccess');
+              me.fireEvent('eventRecordIdUpdated',vm.get("recordId"));
+           
                 Ext.Msg.alert('Error', errorMsg);
             }
         });

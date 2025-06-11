@@ -15,6 +15,7 @@ Ext.define('Consulting.controller.ExpenseAttachmentController', {
         }
     },
     onRecordIdUpdated: function(recordId) {
+        debugger;
         var vm = this.getViewModel();
         vm.set("recordId", recordId); // Set the recordId in the ViewModel
         console.log('Record ID updated:', recordId);

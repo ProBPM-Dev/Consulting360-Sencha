@@ -29,17 +29,18 @@ onSubmit: function() {
     var form = this.getView();
     var fileField = form.down('filefield');
     var file = fileField.getFiles()[0];
-    
+    debugger;
     if (!file) {
         Ext.Msg.alert('Error', 'Please select a file.');
         return;
     }
-
+ var vm = this.getViewModel();
+    var recordId = vm.get('recordId'); 
     var formData = new FormData();
     formData.append('file', file);  // Must match @RequestParam("file")
 
     Ext.Ajax.request({
-        url: 'http://localhost:8080/api/saveTSAttachment/9',
+        url: 'http://localhost:8080/api/saveTSAttachment/' +recordId,
         method: 'POST',
         rawData: formData,
         headers: {
